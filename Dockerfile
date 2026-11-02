@@ -3,6 +3,7 @@ FROM python:3.12-alpine
 WORKDIR /app
 RUN adduser -D webuser && mkdir -p /data && chown webuser:webuser /data
 COPY darts_schedule_web.html /app/index.html
+COPY logo.webp /app/logo.webp
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json, os
@@ -40,6 +41,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path=='/' or self.path=='/index.html':
             with open('/app/index.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
+        if self.path=='/logo.webp':
+            with open('/app/logo.webp','rb') as f: return self.reply(200,f.read(),'image/webp')
         if self.path=='/api/state': return self.reply(200,load())
         return self.reply(404,{'error':'Not found'})
     def do_PUT(self):
