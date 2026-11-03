@@ -38,6 +38,15 @@ opens the page. Use "Download backup" in the header to save a copy of the curren
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
 manifest and icons for this).
 
+### Big-screen display
+
+`http://localhost:8080/display` is a read-only, auto-rotating scoreboard meant for a TV
+or projector during a competition: large type, no controls. It cycles through each
+poule's standings and next match, then a slide for the knockout bracket (semis/final, or
+quarterfinals too with 4 poules), polling the server every 5 seconds and advancing every
+10 seconds. Both can be tuned per screen with query parameters, e.g.
+`/display?interval=15&refresh=3`.
+
 ### Read-only mode and login
 
 Set `EDITOR_PASSWORD` when starting the container to make the page read-only for anyone

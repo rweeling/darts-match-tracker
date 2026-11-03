@@ -3,6 +3,7 @@ FROM python:3.12-alpine
 WORKDIR /app
 RUN adduser -D webuser && mkdir -p /data && chown webuser:webuser /data
 COPY darts_schedule_web.html /app/index.html
+COPY darts_display.html /app/display.html
 COPY logo.webp /app/logo.webp
 COPY manifest.json /app/manifest.json
 COPY icon-180.png /app/icon-180.png
@@ -110,6 +111,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path=='/' or self.path=='/index.html':
             with open('/app/index.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
+        if self.path=='/display' or self.path=='/display.html':
+            with open('/app/display.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
         if self.path=='/logo.webp':
             with open('/app/logo.webp','rb') as f: return self.reply(200,f.read(),'image/webp')
         if self.path=='/manifest.json':
