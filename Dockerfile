@@ -31,13 +31,16 @@ def is_authed(handler):
 def default_pool(size):
     return {'names':[f'Speler {i}' for i in range(1,size+1)],'results':{},'bullOrder':{}}
 def default_state():
-    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[]}
+    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[]}
 def migrate(data):
     if not isinstance(data,dict): return default_state()
-    if 'pools' in data: return data
+    if 'pools' in data:
+        data.setdefault('tally180',{})
+        data.setdefault('finishes',[])
+        return data
     size=data.get('size',4)
     if not isinstance(size,int) or size not in range(4,9): size=4
-    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[])}
+    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[]),'tally180':{},'finishes':[]}
 def load():
     if not os.path.exists(DATA): return default_state()
     with open(DATA,encoding='utf-8') as f: return migrate(json.load(f))
@@ -68,6 +71,19 @@ def validate_cross(cross,pool_count,size):
         if len(parts)!=2 or not all(p.isdigit() for p in parts): raise ValueError('Ongeldige kruisfinale winnaar.')
         p,i=int(parts[0]),int(parts[1])
         if not (0<=p<pool_count and 0<=i<size): raise ValueError('Ongeldige kruisfinale winnaar.')
+def validate_tally180(tally):
+    if not isinstance(tally,dict) or len(tally)>200: raise ValueError('Ongeldige 180-telling.')
+    for k,v in tally.items():
+        if not isinstance(k,str) or not k or len(k)>36: raise ValueError('Ongeldige spelernaam bij 180-telling.')
+        if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<=100000): raise ValueError('Ongeldig aantal 180ers.')
+def validate_finishes(finishes):
+    if not isinstance(finishes,list) or len(finishes)>2000: raise ValueError('Ongeldige lijst met hoge finishes.')
+    for e in finishes:
+        if not isinstance(e,dict): raise ValueError('Ongeldige hoge finish.')
+        if not isinstance(e.get('date',''),str) or len(e.get('date',''))>20: raise ValueError('Ongeldige datum bij hoge finish.')
+        if not isinstance(e.get('player',''),str) or not e.get('player','') or len(e.get('player',''))>36: raise ValueError('Ongeldige spelernaam bij hoge finish.')
+        score=e.get('score')
+        if not (isinstance(score,int) and not isinstance(score,bool) and 101<=score<=180): raise ValueError('Ongeldige hoge finish (101-180).')
 def save(state):
     pool_count=int(state.get('poolCount',1))
     if pool_count not in (1,2,4): raise ValueError('Aantal poules moet 1, 2 of 4 zijn.')
@@ -97,7 +113,11 @@ def save(state):
         if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Ongeldige kampioen in geschiedenis.')
         if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Ongeldige tweede plaats in geschiedenis.')
         if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Ongeldige poulegrootte in geschiedenis.')
-    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history}
+    tally180=state.get('tally180',{})
+    validate_tally180(tally180)
+    finishes=state.get('finishes',[])
+    validate_finishes(finishes)
+    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes}
     tmp=DATA+'.tmp'
     with open(tmp,'w',encoding='utf-8') as f: json.dump(clean,f,ensure_ascii=False)
     os.replace(tmp,DATA)
