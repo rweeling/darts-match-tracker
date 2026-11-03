@@ -26,7 +26,7 @@ def is_authed(handler):
     token=get_cookie(handler,'session')
     return bool(token) and hmac.compare_digest(token,make_token())
 def load():
-    if not os.path.exists(DATA): return {'size':4,'names':[f'Speler {i}' for i in range(1,5)],'results':{},'date':'','history':[]}
+    if not os.path.exists(DATA): return {'size':4,'names':[f'Speler {i}' for i in range(1,5)],'results':{},'date':'','history':[],'bullOrder':{}}
     with open(DATA,encoding='utf-8') as f: return json.load(f)
 def save(state):
     size=int(state.get('size',4))
@@ -45,7 +45,14 @@ def save(state):
         if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Ongeldige kampioen in geschiedenis.')
         if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Ongeldige tweede plaats in geschiedenis.')
         if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Ongeldige poulegrootte in geschiedenis.')
-    clean={'size':size,'names':names,'results':results,'date':date,'history':history}
+    bull_order=state.get('bullOrder',{})
+    if not isinstance(bull_order,dict) or len(bull_order)>20: raise ValueError('Ongeldige bull-ronde data.')
+    for k,v in bull_order.items():
+        if not isinstance(k,str) or len(k)>40: raise ValueError('Ongeldige bull-ronde sleutel.')
+        if not isinstance(v,list) or len(v)>8: raise ValueError('Ongeldige bull-ronde volgorde.')
+        for x in v:
+            if x!='' and not (isinstance(x,int) and not isinstance(x,bool) and 0<=x<8): raise ValueError('Ongeldige bull-ronde speler.')
+    clean={'size':size,'names':names,'results':results,'date':date,'history':history,'bullOrder':bull_order}
     tmp=DATA+'.tmp'
     with open(tmp,'w',encoding='utf-8') as f: json.dump(clean,f,ensure_ascii=False)
     os.replace(tmp,DATA)

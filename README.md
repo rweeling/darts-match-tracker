@@ -5,6 +5,12 @@ round-robin fixture sheet for a poule of 4-8 players, with semifinals (1st vs 4t
 vs 3rd) and a final. Fixture patterns for 4, 5, 6 and 7 players are copied verbatim from
 the workbook's matrices; see "Known limitations" below for 8 players.
 
+Seeding for the top 4 is by poule wins. When two or more players are tied on wins in a
+way that affects who lands in positions 1-4 (the whole top 4, or just part of it, e.g.
+only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a "Bull-ronde
+nodig" card asking for the result of an actual bull-off, and holds the semifinal back
+until that's filled in.
+
 ## Build and run
 
 ```bash
