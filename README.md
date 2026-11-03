@@ -11,6 +11,17 @@ only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a
 nodig" card asking for the result of an actual bull-off, and holds the semifinal back
 until that's filled in.
 
+### Multiple poules
+
+"Aantal poules" (1, 2, or 4) runs that many poules side by side, each with its own
+round-robin schedule and names. With more than one poule, only the top 2 of each poule
+advance (ties affecting 1st/2nd get the same bull-off treatment as above, just for the
+top 2 instead of the top 4), and they cross into a knockout bracket instead of the
+single-poule semifinal: with 2 poules, poule A's #1 plays poule B's #2 and poule B's #1
+plays poule A's #2, then the two winners meet in the final; with 4 poules, the same
+cross-seeding happens within each pair of poules (A/B and C/D) as a quarterfinal round
+first. All poules share one poule size.
+
 ## Build and run
 
 ```bash
@@ -61,6 +72,6 @@ docker volume rm darts-data
   4-player pools (named KOP/MUNT after a coin toss) whose winners and runners-up cross
   over into the semifinal. This app models a single pool of 4 with the same top-4
   reseed semifinal used for 5-7 players, which is a simpler format than the workbook's.
-- Only one poule can be tracked per running container (one shared `state.json`). Running
-  multiple simultaneous poules (e.g. the workbook's dual KOP/MUNT pools) needs one
-  container instance per poule.
+- Only 1, 2, or 4 poules are supported per running container (not an arbitrary count),
+  so the cross-bracket stays a clean knockout. All poules in a container share one
+  poule size.

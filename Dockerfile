@@ -10,10 +10,12 @@ COPY icon-192.png /app/icon-192.png
 COPY icon-512.png /app/icon-512.png
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os, hmac, hashlib
+import json, os, hmac, hashlib, re
 
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
+MATCH_ID_RE=re.compile(r'^\d+-\d+$')
+CROSS_KEYS={1:set(),2:{'sf-0','sf-1','final'},4:{'qf-0','qf-1','qf-2','qf-3','sf-0','sf-1','final'}}
 def make_token():
     return hmac.new(EDITOR_PASSWORD.encode(),b'editor-session',hashlib.sha256).hexdigest()
 def get_cookie(handler,name):
@@ -25,16 +27,65 @@ def is_authed(handler):
     if not EDITOR_PASSWORD: return True
     token=get_cookie(handler,'session')
     return bool(token) and hmac.compare_digest(token,make_token())
+def default_pool(size):
+    return {'names':[f'Speler {i}' for i in range(1,size+1)],'results':{},'bullOrder':{}}
+def default_state():
+    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[]}
+def migrate(data):
+    if not isinstance(data,dict): return default_state()
+    if 'pools' in data: return data
+    size=data.get('size',4)
+    if not isinstance(size,int) or size not in range(4,9): size=4
+    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[])}
 def load():
-    if not os.path.exists(DATA): return {'size':4,'names':[f'Speler {i}' for i in range(1,5)],'results':{},'date':'','history':[],'bullOrder':{}}
-    with open(DATA,encoding='utf-8') as f: return json.load(f)
+    if not os.path.exists(DATA): return default_state()
+    with open(DATA,encoding='utf-8') as f: return migrate(json.load(f))
+def validate_bull_order(bo,size):
+    if not isinstance(bo,dict) or len(bo)>20: raise ValueError('Ongeldige bull-ronde data.')
+    for k,v in bo.items():
+        if not isinstance(k,str) or len(k)>40: raise ValueError('Ongeldige bull-ronde sleutel.')
+        if not isinstance(v,list) or len(v)>size: raise ValueError('Ongeldige bull-ronde volgorde.')
+        for x in v:
+            if x!='' and not (isinstance(x,int) and not isinstance(x,bool) and 0<=x<size): raise ValueError('Ongeldige bull-ronde speler.')
+def validate_pool_results(results,size,allow_bracket):
+    if not isinstance(results,dict): raise ValueError('Ongeldige wedstrijduitslagen.')
+    allowed_keys={'semi-0','semi-1','final'} if allow_bracket else set()
+    for k,v in results.items():
+        if not isinstance(k,str): raise ValueError('Ongeldige wedstrijduitslag.')
+        if not (MATCH_ID_RE.match(k) or k in allowed_keys): raise ValueError('Ongeldige wedstrijduitslag.')
+        if MATCH_ID_RE.match(k):
+            a,b=(int(x) for x in k.split('-'))
+            if not (0<=a<size and 0<=b<size and a<b): raise ValueError('Ongeldige wedstrijduitslag.')
+        if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<size): raise ValueError('Ongeldige winnaar.')
+def validate_cross(cross,pool_count,size):
+    if not isinstance(cross,dict): raise ValueError('Ongeldige kruisfinale data.')
+    allowed=CROSS_KEYS.get(pool_count,set())
+    for k,v in cross.items():
+        if k not in allowed: raise ValueError('Ongeldige kruisfinale sleutel.')
+        if not isinstance(v,str): raise ValueError('Ongeldige kruisfinale winnaar.')
+        parts=v.split(':')
+        if len(parts)!=2 or not all(p.isdigit() for p in parts): raise ValueError('Ongeldige kruisfinale winnaar.')
+        p,i=int(parts[0]),int(parts[1])
+        if not (0<=p<pool_count and 0<=i<size): raise ValueError('Ongeldige kruisfinale winnaar.')
 def save(state):
+    pool_count=int(state.get('poolCount',1))
+    if pool_count not in (1,2,4): raise ValueError('Aantal poules moet 1, 2 of 4 zijn.')
     size=int(state.get('size',4))
     if size not in range(4,9): raise ValueError('Poulegrootte moet 4–8 zijn.')
-    names=state.get('names',[])
-    if not isinstance(names,list) or len(names)!=size or any(not isinstance(x,str) or len(x)>36 for x in names): raise ValueError('Geef een geldige naam op voor elke speler (maximaal 36 tekens).')
-    results=state.get('results',{})
-    if not isinstance(results,dict): raise ValueError('Ongeldige wedstrijduitslagen.')
+    pools_in=state.get('pools',[])
+    if not isinstance(pools_in,list) or len(pools_in)!=pool_count: raise ValueError('Ongeldig aantal poules.')
+    pools=[]
+    for pl in pools_in:
+        if not isinstance(pl,dict): raise ValueError('Ongeldige poule.')
+        names=pl.get('names',[])
+        if not isinstance(names,list) or len(names)!=size or any(not isinstance(x,str) or len(x)>36 for x in names): raise ValueError('Geef een geldige naam op voor elke speler (maximaal 36 tekens).')
+        results=pl.get('results',{})
+        validate_pool_results(results,size,pool_count==1)
+        bull_order=pl.get('bullOrder',{})
+        validate_bull_order(bull_order,size)
+        pools.append({'names':names,'results':results,'bullOrder':bull_order})
+    cross=state.get('cross',{})
+    validate_cross(cross,pool_count,size)
     date=state.get('date','')
     if not isinstance(date,str) or len(date)>20: raise ValueError('Ongeldige datum.')
     history=state.get('history',[])
@@ -45,14 +96,7 @@ def save(state):
         if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Ongeldige kampioen in geschiedenis.')
         if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Ongeldige tweede plaats in geschiedenis.')
         if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Ongeldige poulegrootte in geschiedenis.')
-    bull_order=state.get('bullOrder',{})
-    if not isinstance(bull_order,dict) or len(bull_order)>20: raise ValueError('Ongeldige bull-ronde data.')
-    for k,v in bull_order.items():
-        if not isinstance(k,str) or len(k)>40: raise ValueError('Ongeldige bull-ronde sleutel.')
-        if not isinstance(v,list) or len(v)>8: raise ValueError('Ongeldige bull-ronde volgorde.')
-        for x in v:
-            if x!='' and not (isinstance(x,int) and not isinstance(x,bool) and 0<=x<8): raise ValueError('Ongeldige bull-ronde speler.')
-    clean={'size':size,'names':names,'results':results,'date':date,'history':history,'bullOrder':bull_order}
+    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history}
     tmp=DATA+'.tmp'
     with open(tmp,'w',encoding='utf-8') as f: json.dump(clean,f,ensure_ascii=False)
     os.replace(tmp,DATA)
