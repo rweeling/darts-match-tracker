@@ -26,25 +26,25 @@ def is_authed(handler):
     token=get_cookie(handler,'session')
     return bool(token) and hmac.compare_digest(token,make_token())
 def load():
-    if not os.path.exists(DATA): return {'size':4,'names':[f'Player {i}' for i in range(1,5)],'results':{},'date':'','history':[]}
+    if not os.path.exists(DATA): return {'size':4,'names':[f'Speler {i}' for i in range(1,5)],'results':{},'date':'','history':[]}
     with open(DATA,encoding='utf-8') as f: return json.load(f)
 def save(state):
     size=int(state.get('size',4))
-    if size not in range(4,9): raise ValueError('Group size must be 4–8.')
+    if size not in range(4,9): raise ValueError('Poulegrootte moet 4–8 zijn.')
     names=state.get('names',[])
-    if not isinstance(names,list) or len(names)!=size or any(not isinstance(x,str) or len(x)>36 for x in names): raise ValueError('Please provide a valid name for each player (maximum 36 characters).')
+    if not isinstance(names,list) or len(names)!=size or any(not isinstance(x,str) or len(x)>36 for x in names): raise ValueError('Geef een geldige naam op voor elke speler (maximaal 36 tekens).')
     results=state.get('results',{})
-    if not isinstance(results,dict): raise ValueError('Invalid match results.')
+    if not isinstance(results,dict): raise ValueError('Ongeldige wedstrijduitslagen.')
     date=state.get('date','')
-    if not isinstance(date,str) or len(date)>20: raise ValueError('Invalid date.')
+    if not isinstance(date,str) or len(date)>20: raise ValueError('Ongeldige datum.')
     history=state.get('history',[])
-    if not isinstance(history,list) or len(history)>1000: raise ValueError('Invalid history.')
+    if not isinstance(history,list) or len(history)>1000: raise ValueError('Ongeldige geschiedenis.')
     for h in history:
-        if not isinstance(h,dict): raise ValueError('Invalid history entry.')
-        if not isinstance(h.get('date',''),str) or len(h.get('date',''))>20: raise ValueError('Invalid history date.')
-        if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Invalid history champion.')
-        if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Invalid history runner-up.')
-        if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Invalid history size.')
+        if not isinstance(h,dict): raise ValueError('Ongeldig geschiedenisitem.')
+        if not isinstance(h.get('date',''),str) or len(h.get('date',''))>20: raise ValueError('Ongeldige datum in geschiedenis.')
+        if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Ongeldige kampioen in geschiedenis.')
+        if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Ongeldige tweede plaats in geschiedenis.')
+        if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Ongeldige poulegrootte in geschiedenis.')
     clean={'size':size,'names':names,'results':results,'date':date,'history':history}
     tmp=DATA+'.tmp'
     with open(tmp,'w',encoding='utf-8') as f: json.dump(clean,f,ensure_ascii=False)
@@ -67,25 +67,25 @@ class Handler(BaseHTTPRequestHandler):
             with open(f'/app{self.path}','rb') as f: return self.reply(200,f.read(),'image/png')
         if self.path=='/api/state': return self.reply(200,load())
         if self.path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
-        return self.reply(404,{'error':'Not found'})
+        return self.reply(404,{'error':'Niet gevonden'})
     def do_POST(self):
         if self.path=='/api/login':
             try: body=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
-            except json.JSONDecodeError: return self.reply(400,{'error':'Invalid request'})
+            except json.JSONDecodeError: return self.reply(400,{'error':'Ongeldig verzoek'})
             password=str(body.get('password',''))
             if not EDITOR_PASSWORD or hmac.compare_digest(password,EDITOR_PASSWORD):
                 return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':f'session={make_token()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=15552000'})
-            return self.reply(401,{'error':'Incorrect password'})
+            return self.reply(401,{'error':'Onjuist wachtwoord'})
         if self.path=='/api/logout':
             return self.reply(200,{'authed':False},extra_headers={'Set-Cookie':'session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'})
-        return self.reply(404,{'error':'Not found'})
+        return self.reply(404,{'error':'Niet gevonden'})
     def do_PUT(self):
-        if self.path!='/api/state': return self.reply(404,{'error':'Not found'})
-        if not is_authed(self): return self.reply(401,{'error':'Log in to edit.'})
+        if self.path!='/api/state': return self.reply(404,{'error':'Niet gevonden'})
+        if not is_authed(self): return self.reply(401,{'error':'Log in om te bewerken.'})
         try:
             state=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
             return self.reply(200,save(state))
-        except (ValueError,TypeError,KeyError,json.JSONDecodeError) as e: return self.reply(400,{'error':str(e) or 'Invalid state'})
+        except (ValueError,TypeError,KeyError,json.JSONDecodeError) as e: return self.reply(400,{'error':str(e) or 'Ongeldige status'})
     def log_message(self,*args): pass
 ThreadingHTTPServer(('0.0.0.0',8080),Handler).serve_forever()
 PY
