@@ -10,9 +10,21 @@ COPY icon-192.png /app/icon-192.png
 COPY icon-512.png /app/icon-512.png
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os
+import json, os, hmac, hashlib
 
 DATA='/data/state.json'
+EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
+def make_token():
+    return hmac.new(EDITOR_PASSWORD.encode(),b'editor-session',hashlib.sha256).hexdigest()
+def get_cookie(handler,name):
+    for part in handler.headers.get('Cookie','').split(';'):
+        part=part.strip()
+        if part.startswith(name+'='): return part[len(name)+1:]
+    return None
+def is_authed(handler):
+    if not EDITOR_PASSWORD: return True
+    token=get_cookie(handler,'session')
+    return bool(token) and hmac.compare_digest(token,make_token())
 def load():
     if not os.path.exists(DATA): return {'size':4,'names':[f'Player {i}' for i in range(1,5)],'results':{},'date':'','history':[]}
     with open(DATA,encoding='utf-8') as f: return json.load(f)
@@ -39,9 +51,11 @@ def save(state):
     os.replace(tmp,DATA)
     return clean
 class Handler(BaseHTTPRequestHandler):
-    def reply(self,status,obj,ctype='application/json; charset=utf-8'):
+    def reply(self,status,obj,ctype='application/json; charset=utf-8',extra_headers=None):
         body=obj if isinstance(obj,bytes) else json.dumps(obj,ensure_ascii=False).encode()
-        self.send_response(status);self.send_header('Content-Type',ctype);self.send_header('Content-Length',str(len(body)));self.send_header('X-Content-Type-Options','nosniff');self.end_headers();self.wfile.write(body)
+        self.send_response(status);self.send_header('Content-Type',ctype);self.send_header('Content-Length',str(len(body)));self.send_header('X-Content-Type-Options','nosniff')
+        for k,v in (extra_headers or {}).items(): self.send_header(k,v)
+        self.end_headers();self.wfile.write(body)
     def do_GET(self):
         if self.path=='/' or self.path=='/index.html':
             with open('/app/index.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
@@ -52,9 +66,22 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in ('/icon-180.png','/icon-192.png','/icon-512.png'):
             with open(f'/app{self.path}','rb') as f: return self.reply(200,f.read(),'image/png')
         if self.path=='/api/state': return self.reply(200,load())
+        if self.path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
+        return self.reply(404,{'error':'Not found'})
+    def do_POST(self):
+        if self.path=='/api/login':
+            try: body=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
+            except json.JSONDecodeError: return self.reply(400,{'error':'Invalid request'})
+            password=str(body.get('password',''))
+            if not EDITOR_PASSWORD or hmac.compare_digest(password,EDITOR_PASSWORD):
+                return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':f'session={make_token()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=15552000'})
+            return self.reply(401,{'error':'Incorrect password'})
+        if self.path=='/api/logout':
+            return self.reply(200,{'authed':False},extra_headers={'Set-Cookie':'session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'})
         return self.reply(404,{'error':'Not found'})
     def do_PUT(self):
         if self.path!='/api/state': return self.reply(404,{'error':'Not found'})
+        if not is_authed(self): return self.reply(401,{'error':'Log in to edit.'})
         try:
             state=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
             return self.reply(200,save(state))

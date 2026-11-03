@@ -21,6 +21,21 @@ opens the page. Use "Download backup" in the header to save a copy of the curren
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
 manifest and icons for this).
 
+### Read-only mode and login
+
+Set `EDITOR_PASSWORD` when starting the container to make the page read-only for anyone
+who hasn't logged in with that password:
+
+```bash
+docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
+  -e EDITOR_PASSWORD=yourpassword darts-tracker
+```
+
+Everyone can still view the page and download backups. "Log in to edit" in the header
+unlocks the names, results, reset, and history controls for that browser (via a
+session cookie) until they log out. Leave `EDITOR_PASSWORD` unset to keep the previous
+behavior, where anyone can edit.
+
 To reset a tournament, stop the container and remove the volume:
 
 ```bash
