@@ -15,8 +15,11 @@ docker build -t darts-tracker .
 docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data darts-tracker
 ```
 
-Open `http://localhost:8080`. State (player names and results) is stored in the
-`darts-data` volume at `/data/state.json` and shared with everyone who opens the page.
+Open `http://localhost:8080`. State (player names, results, and tournament history) is
+stored in the `darts-data` volume at `/data/state.json` and shared with everyone who
+opens the page. Use "Download backup" in the header to save a copy of the current state
+as a JSON file. The page can also be added to a phone's home screen (it ships a web app
+manifest and icons for this).
 
 To reset a tournament, stop the container and remove the volume:
 

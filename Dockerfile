@@ -4,6 +4,10 @@ WORKDIR /app
 RUN adduser -D webuser && mkdir -p /data && chown webuser:webuser /data
 COPY darts_schedule_web.html /app/index.html
 COPY logo.webp /app/logo.webp
+COPY manifest.json /app/manifest.json
+COPY icon-180.png /app/icon-180.png
+COPY icon-192.png /app/icon-192.png
+COPY icon-512.png /app/icon-512.png
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json, os
@@ -43,6 +47,10 @@ class Handler(BaseHTTPRequestHandler):
             with open('/app/index.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
         if self.path=='/logo.webp':
             with open('/app/logo.webp','rb') as f: return self.reply(200,f.read(),'image/webp')
+        if self.path=='/manifest.json':
+            with open('/app/manifest.json','rb') as f: return self.reply(200,f.read(),'application/manifest+json')
+        if self.path in ('/icon-180.png','/icon-192.png','/icon-512.png'):
+            with open(f'/app{self.path}','rb') as f: return self.reply(200,f.read(),'image/png')
         if self.path=='/api/state': return self.reply(200,load())
         return self.reply(404,{'error':'Not found'})
     def do_PUT(self):
