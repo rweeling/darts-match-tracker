@@ -83,7 +83,7 @@ def validate_finishes(finishes):
         if not isinstance(e.get('date',''),str) or len(e.get('date',''))>20: raise ValueError('Ongeldige datum bij hoge finish.')
         if not isinstance(e.get('player',''),str) or not e.get('player','') or len(e.get('player',''))>36: raise ValueError('Ongeldige spelernaam bij hoge finish.')
         score=e.get('score')
-        if not (isinstance(score,int) and not isinstance(score,bool) and 100<=score<=180): raise ValueError('Ongeldige hoge finish (100-180).')
+        if not (isinstance(score,int) and not isinstance(score,bool) and 100<=score<1000): raise ValueError('Ongeldige hoge finish (100+).')
 def save(state):
     pool_count=int(state.get('poolCount',1))
     if pool_count not in (1,2,4): raise ValueError('Aantal poules moet 1, 2 of 4 zijn.')
