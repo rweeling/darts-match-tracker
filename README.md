@@ -127,3 +127,8 @@ docker volume rm darts-data
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Contributors
+
+- Ramon Weeling ([@rweeling](https://github.com/rweeling))
+- Claude (Anthropic) — AI pair-programming assistant
