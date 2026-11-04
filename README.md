@@ -75,7 +75,7 @@ Open `http://localhost:8080`. State (player names, results, and tournament histo
 stored in the `darts-data` volume at `/data/state.json` and shared with everyone who
 opens the page. Use "Download backup" in the header to save a copy of the current state
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
-manifest and icons for this).
+manifest for this).
 
 As a safety net, the server also keeps `state.json.bak` in that same volume: a copy of
 the state from just before the most recent save, in case a save goes wrong (for example
