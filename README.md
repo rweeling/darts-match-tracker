@@ -22,6 +22,35 @@ plays poule A's #2, then the two winners meet in the final; with 4 poules, the s
 cross-seeding happens within each pair of poules (A/B and C/D) as a quarterfinal round
 first. All poules share one poule size.
 
+## How to use it
+
+This is the website your club opens on match night to keep score. Here's what to do,
+in plain terms:
+
+1. **Open the page** in a browser (on a laptop, tablet, or phone) at the address your
+   club gives you — e.g. `http://192.168.x.x:8080`, or whatever address was set up.
+2. **Fill in the player names** for each poule, under "Spelersnamen". These save
+   automatically as you type — no save button needed.
+3. **As each match finishes**, find that match in the schedule grid and pick the
+   winner from the dropdown in that cell. Everyone's win count and the knockout
+   bracket update themselves right away.
+4. **During a match, log the highlights**: switch to the "Statistieken" tab and tap
+   "180 gegooid" whenever someone throws a 180, or type a score of 75 or higher into
+   the finish box and tap "Toevoegen" for a big finish. These lists keep running all
+   season, even after you reset for a new tournament.
+5. **If the top spots end up tied**, the app will show a "Bull-ronde nodig" card
+   asking for a real bull-off to settle the order — just fill in who came out on top.
+6. **When the final is played**, pick the winner and press the button to save it to
+   "Eerdere winnaars" (previous winners) and start a fresh night.
+7. **Put the big screen up**: open `/display` (e.g. `http://192.168.x.x:8080/display`)
+   on the TV or projector — it's read-only and cycles through standings and matches on
+   its own, nothing to click.
+8. There's a **"Backup downloaden" button** in the header if someone wants a copy of
+   the current data saved to a file, and a light/dark theme toggle next to it.
+
+If logins are turned on for your club, anyone can look at the page, but editing names,
+results, and history needs "Log in to edit" in the header first.
+
 ## Build and run
 
 ```bash
