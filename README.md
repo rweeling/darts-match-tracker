@@ -1,9 +1,9 @@
 # Darts Match Tracker
 
-A containerized, single-page version of the `Wedstrijdschema darten.xlsx` workbook: a
-round-robin fixture sheet for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd
-vs 3rd) and a final. Fixture patterns for 4, 5, 6 and 7 players are copied verbatim from
-the workbook's matrices; see "Known limitations" below for 8 players.
+A containerized, single-page darts tournament tracker: a round-robin fixture schedule
+for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd vs 3rd) and a final.
+Fixture patterns for 4, 5, 6, and 7 players follow a fixed match order; 8-player pools
+use an algorithmically generated schedule instead (see "Known limitations" below).
 
 Seeding for the top 4 is by pool wins. When two or more players are tied on wins in a
 way that affects who lands in positions 1-4 (the whole top 4, or just part of it, e.g.
@@ -116,16 +116,9 @@ docker volume rm darts-data
 
 ## Known limitations
 
-- **8-player pools**: the workbook's own "POULE VAN 8" sheet never had its fixture
-  matrix (columns W.1-W.7) filled in, and the "POULE VAN 8 OLD" sheet uses a different,
-  conflicting match order. There's no single authoritative 8-player sequence to copy, so
-  the app generates a valid round-robin schedule algorithmically instead (every pair
-  plays exactly once across 7 rounds) — it does not reproduce either workbook sheet's
-  match order.
-- **4-player pools**: the workbook's "POULE VAN 4" sheet actually models *two* separate
-  4-player pools (named KOP/MUNT after a coin toss) whose winners and runners-up cross
-  over into the semifinal. This app models a single pool of 4 with the same top-4
-  reseed semifinal used for 5-7 players, which is a simpler format than the workbook's.
+- **8-player pools** use an algorithmically generated round-robin schedule rather than
+  a fixed match-order table (every pair plays exactly once across 7 rounds), unlike the
+  fixed patterns used for 4-7 players.
 - Only 1, 2, 4, 6, 8, or 10 pools are supported per running container (not an
   arbitrary count). 6 and 10 pools use a seeded knockout bracket with byes (see
   "Multiple pools" above) rather than a clean power-of-2 bracket. All pools in a
