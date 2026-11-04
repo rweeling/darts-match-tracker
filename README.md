@@ -123,3 +123,7 @@ docker volume rm darts-data
   arbitrary count). 6 and 10 pools use a seeded knockout bracket with byes (see
   "Multiple pools" above) rather than a clean power-of-2 bracket. All pools in a
   container share one pool size.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
