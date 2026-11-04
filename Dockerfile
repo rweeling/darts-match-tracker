@@ -11,7 +11,7 @@ COPY icon-192.png /app/icon-192.png
 COPY icon-512.png /app/icon-512.png
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os, hmac, hashlib, re
+import json, os, shutil, hmac, hashlib, re
 
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
@@ -157,6 +157,9 @@ def save(state):
     finishes=state.get('finishes',[])
     validate_finishes(finishes)
     clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes}
+    if os.path.exists(DATA):
+        try: shutil.copyfile(DATA,DATA+'.bak')
+        except OSError: pass
     tmp=DATA+'.tmp'
     with open(tmp,'w',encoding='utf-8') as f: json.dump(clean,f,ensure_ascii=False)
     os.replace(tmp,DATA)
@@ -168,18 +171,19 @@ class Handler(BaseHTTPRequestHandler):
         for k,v in (extra_headers or {}).items(): self.send_header(k,v)
         self.end_headers();self.wfile.write(body)
     def do_GET(self):
-        if self.path=='/' or self.path=='/index.html':
+        path=self.path.split('?',1)[0]
+        if path=='/' or path=='/index.html':
             with open('/app/index.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
-        if self.path=='/display' or self.path=='/display.html':
+        if path=='/display' or path=='/display.html':
             with open('/app/display.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
-        if self.path=='/logo.webp':
+        if path=='/logo.webp':
             with open('/app/logo.webp','rb') as f: return self.reply(200,f.read(),'image/webp')
-        if self.path=='/manifest.json':
+        if path=='/manifest.json':
             with open('/app/manifest.json','rb') as f: return self.reply(200,f.read(),'application/manifest+json')
-        if self.path in ('/icon-180.png','/icon-192.png','/icon-512.png'):
-            with open(f'/app{self.path}','rb') as f: return self.reply(200,f.read(),'image/png')
-        if self.path=='/api/state': return self.reply(200,load())
-        if self.path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
+        if path in ('/icon-180.png','/icon-192.png','/icon-512.png'):
+            with open(f'/app{path}','rb') as f: return self.reply(200,f.read(),'image/png')
+        if path=='/api/state': return self.reply(200,load())
+        if path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
         return self.reply(404,{'error':'Not found'})
     def do_POST(self):
         if self.path=='/api/login':

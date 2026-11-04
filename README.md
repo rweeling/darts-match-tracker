@@ -77,6 +77,12 @@ opens the page. Use "Download backup" in the header to save a copy of the curren
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
 manifest and icons for this).
 
+As a safety net, the server also keeps `state.json.bak` in that same volume: a copy of
+the state from just before the most recent save, in case a save goes wrong (for example
+an accidental "Import backup" of the wrong file). There's no restore button for it — it
+can only be put back by someone with access to the volume, by copying it over
+`state.json` and restarting the container.
+
 ### Big-screen display
 
 `http://localhost:8080/display` is a read-only, auto-rotating scoreboard meant for a TV
