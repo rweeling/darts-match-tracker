@@ -1,26 +1,26 @@
 # Darts Match Tracker
 
 A containerized, single-page version of the `Wedstrijdschema darten.xlsx` workbook: a
-round-robin fixture sheet for a poule of 4-8 players, with semifinals (1st vs 4th, 2nd
+round-robin fixture sheet for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd
 vs 3rd) and a final. Fixture patterns for 4, 5, 6 and 7 players are copied verbatim from
 the workbook's matrices; see "Known limitations" below for 8 players.
 
-Seeding for the top 4 is by poule wins. When two or more players are tied on wins in a
+Seeding for the top 4 is by pool wins. When two or more players are tied on wins in a
 way that affects who lands in positions 1-4 (the whole top 4, or just part of it, e.g.
-only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a "Bull-ronde
-nodig" card asking for the result of an actual bull-off, and holds the semifinal back
+only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a "Bull-off
+needed" card asking for the result of an actual bull-off, and holds the semifinal back
 until that's filled in.
 
-### Multiple poules
+### Multiple pools
 
-"Aantal poules" (1, 2, or 4) runs that many poules side by side, each with its own
-round-robin schedule and names. With more than one poule, only the top 2 of each poule
+"Number of pools" (1, 2, or 4) runs that many pools side by side, each with its own
+round-robin schedule and names. With more than one pool, only the top 2 of each pool
 advance (ties affecting 1st/2nd get the same bull-off treatment as above, just for the
 top 2 instead of the top 4), and they cross into a knockout bracket instead of the
-single-poule semifinal: with 2 poules, poule A's #1 plays poule B's #2 and poule B's #1
-plays poule A's #2, then the two winners meet in the final; with 4 poules, the same
-cross-seeding happens within each pair of poules (A/B and C/D) as a quarterfinal round
-first. All poules share one poule size.
+single-pool semifinal: with 2 pools, pool A's #1 plays pool B's #2 and pool B's #1
+plays pool A's #2, then the two winners meet in the final; with 4 pools, the same
+cross-seeding happens within each pair of pools (A/B and C/D) as a quarterfinal round
+first. All pools share one pool size.
 
 ## How to use it
 
@@ -29,23 +29,23 @@ in plain terms:
 
 1. **Open the page** in a browser (on a laptop, tablet, or phone) at the address your
    club gives you — e.g. `http://192.168.x.x:8080`, or whatever address was set up.
-2. **Fill in the player names** for each poule, under "Spelersnamen". These save
+2. **Fill in the player names** for each pool, under "Player names". These save
    automatically as you type — no save button needed.
 3. **As each match finishes**, find that match in the schedule grid and pick the
    winner from the dropdown in that cell. Everyone's win count and the knockout
    bracket update themselves right away.
-4. **During a match, log the highlights**: switch to the "Statistieken" tab and tap
-   "180 gegooid" whenever someone throws a 180, or type a score of 75 or higher into
-   the finish box and tap "Toevoegen" for a big finish. These lists keep running all
+4. **During a match, log the highlights**: switch to the "Statistics" tab and tap
+   "180 thrown" whenever someone throws a 180, or type a score of 75 or higher into
+   the finish box and tap "Add" for a big finish. These lists keep running all
    season, even after you reset for a new tournament.
-5. **If the top spots end up tied**, the app will show a "Bull-ronde nodig" card
+5. **If the top spots end up tied**, the app will show a "Bull-off needed" card
    asking for a real bull-off to settle the order — just fill in who came out on top.
 6. **When the final is played**, pick the winner and press the button to save it to
-   "Eerdere winnaars" (previous winners) and start a fresh night.
+   "Previous winners" and start a fresh night.
 7. **Put the big screen up**: open `/display` (e.g. `http://192.168.x.x:8080/display`)
    on the TV or projector — it's read-only and cycles through standings and matches on
    its own, nothing to click.
-8. There's a **"Backup downloaden" button** in the header if someone wants a copy of
+8. There's a **"Download backup" button** in the header if someone wants a copy of
    the current data saved to a file, and a light/dark theme toggle next to it.
 
 If logins are turned on for your club, anyone can look at the page, but editing names,
@@ -71,8 +71,8 @@ manifest and icons for this).
 
 `http://localhost:8080/display` is a read-only, auto-rotating scoreboard meant for a TV
 or projector during a competition: large type, no controls. It cycles through each
-poule's standings and next match, then a slide for the knockout bracket (semis/final, or
-quarterfinals too with 4 poules), polling the server every 5 seconds and advancing every
+pool's standings and next match, then a slide for the knockout bracket (semis/final, or
+quarterfinals too with 4 pools), polling the server every 5 seconds and advancing every
 10 seconds. Both can be tuned per screen with query parameters, e.g.
 `/display?interval=15&refresh=3`.
 
@@ -110,6 +110,6 @@ docker volume rm darts-data
   4-player pools (named KOP/MUNT after a coin toss) whose winners and runners-up cross
   over into the semifinal. This app models a single pool of 4 with the same top-4
   reseed semifinal used for 5-7 players, which is a simpler format than the workbook's.
-- Only 1, 2, or 4 poules are supported per running container (not an arbitrary count),
-  so the cross-bracket stays a clean knockout. All poules in a container share one
-  poule size.
+- Only 1, 2, or 4 pools are supported per running container (not an arbitrary count),
+  so the cross-bracket stays a clean knockout. All pools in a container share one
+  pool size.
