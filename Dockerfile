@@ -5,6 +5,7 @@ RUN adduser -D webuser && mkdir -p /data && chown webuser:webuser /data
 COPY darts_schedule_web.html /app/index.html
 COPY darts_display.html /app/display.html
 COPY manifest.json /app/manifest.json
+COPY favicon.svg /app/favicon.svg
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json, os, shutil, hmac, hashlib, re
@@ -174,6 +175,8 @@ class Handler(BaseHTTPRequestHandler):
             with open('/app/display.html','rb') as f: return self.reply(200,f.read(),'text/html; charset=utf-8')
         if path=='/manifest.json':
             with open('/app/manifest.json','rb') as f: return self.reply(200,f.read(),'application/manifest+json')
+        if path=='/favicon.svg':
+            with open('/app/favicon.svg','rb') as f: return self.reply(200,f.read(),'image/svg+xml')
         if path=='/api/state': return self.reply(200,load())
         if path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
         return self.reply(404,{'error':'Not found'})
