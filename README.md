@@ -13,14 +13,21 @@ until that's filled in.
 
 ### Multiple pools
 
-"Number of pools" (1, 2, or 4) runs that many pools side by side, each with its own
-round-robin schedule and names. With more than one pool, only the top 2 of each pool
-advance (ties affecting 1st/2nd get the same bull-off treatment as above, just for the
-top 2 instead of the top 4), and they cross into a knockout bracket instead of the
-single-pool semifinal: with 2 pools, pool A's #1 plays pool B's #2 and pool B's #1
-plays pool A's #2, then the two winners meet in the final; with 4 pools, the same
-cross-seeding happens within each pair of pools (A/B and C/D) as a quarterfinal round
-first. All pools share one pool size.
+"Number of pools" (1, 2, 4, 6, 8, or 10) runs that many pools side by side, each with
+its own round-robin schedule and names. With more than one pool, only the top 2 of
+each pool advance (ties affecting 1st/2nd get the same bull-off treatment as above,
+just for the top 2 instead of the top 4), and they cross into a knockout bracket
+instead of the single-pool semifinal: with 2 pools, pool A's #1 plays pool B's #2 and
+pool B's #1 plays pool A's #2, then the two winners meet in the final; with 4 pools,
+the same cross-seeding happens within each pair of pools (A/B and C/D) as a
+quarterfinal round first. All pools share one pool size.
+
+With 6, 8, or 10 pools there are 12, 16, or 20 qualifiers — not a clean power of 2 —
+so the bracket is seeded with "byes": the strongest-seeded qualifiers (pool winners
+first, then runners-up, in pool order) sit out the first knockout round and advance
+straight through, while the rest play it out. This keeps the #1 and #2 overall seeds
+apart until the final, same as a standard seeded tournament bracket. With 8 pools the
+qualifier count (16) is already a clean power of 2, so there are no byes.
 
 ## How to use it
 
@@ -110,6 +117,7 @@ docker volume rm darts-data
   4-player pools (named KOP/MUNT after a coin toss) whose winners and runners-up cross
   over into the semifinal. This app models a single pool of 4 with the same top-4
   reseed semifinal used for 5-7 players, which is a simpler format than the workbook's.
-- Only 1, 2, or 4 pools are supported per running container (not an arbitrary count),
-  so the cross-bracket stays a clean knockout. All pools in a container share one
-  pool size.
+- Only 1, 2, 4, 6, 8, or 10 pools are supported per running container (not an
+  arbitrary count). 6 and 10 pools use a seeded knockout bracket with byes (see
+  "Multiple pools" above) rather than a clean power-of-2 bracket. All pools in a
+  container share one pool size.

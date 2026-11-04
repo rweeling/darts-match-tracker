@@ -16,7 +16,46 @@ import json, os, hmac, hashlib, re
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
 MATCH_ID_RE=re.compile(r'^\d+-\d+$')
-CROSS_KEYS={1:set(),2:{'sf-0','sf-1','final'},4:{'qf-0','qf-1','qf-2','qf-3','sf-0','sf-1','final'}}
+def seed_order(n):
+    if n==1: return [1]
+    h=seed_order(n//2)
+    out=[]
+    for s in h:
+        out.append(s); out.append(n+1-s)
+    return out
+def next_pow2(n):
+    p=1
+    while p<n: p*=2
+    return p
+def round_name_for_size(sz):
+    return 'final' if sz==2 else 'sf' if sz==4 else 'qf' if sz==8 else f'r{sz}'
+def bracket_round_names(pc):
+    bs=next_pow2(2*pc)
+    names=[]
+    sz=bs
+    while sz>=2:
+        names.append(round_name_for_size(sz)); sz//=2
+    return names
+def cross_keys_for(pool_count):
+    if pool_count==1: return set()
+    if pool_count==2: return {'sf-0','sf-1','final'}
+    if pool_count==4: return {'qf-0','qf-1','qf-2','qf-3','sf-0','sf-1','final'}
+    bs=next_pow2(2*pool_count)
+    n=2*pool_count
+    order=seed_order(bs)
+    names=bracket_round_names(pool_count)
+    non_final=names[:-1]
+    keys=set()
+    r0name=non_final[0]
+    for i in range(bs//2):
+        if order[2*i]<=n and order[2*i+1]<=n: keys.add(f'{r0name}-{i}')
+    num_prev=bs//2
+    for r in range(1,len(non_final)):
+        num_cur=num_prev//2
+        for j in range(num_cur): keys.add(f'{non_final[r]}-{j}')
+        num_prev=num_cur
+    keys.add('final')
+    return keys
 def make_token():
     return hmac.new(EDITOR_PASSWORD.encode(),b'editor-session',hashlib.sha256).hexdigest()
 def get_cookie(handler,name):
@@ -63,7 +102,7 @@ def validate_pool_results(results,size,allow_bracket):
         if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<size): raise ValueError('Invalid winner.')
 def validate_cross(cross,pool_count,size):
     if not isinstance(cross,dict): raise ValueError('Invalid cross-final data.')
-    allowed=CROSS_KEYS.get(pool_count,set())
+    allowed=cross_keys_for(pool_count)
     for k,v in cross.items():
         if k not in allowed: raise ValueError('Invalid cross-final key.')
         if not isinstance(v,str): raise ValueError('Invalid cross-final winner.')
@@ -86,7 +125,7 @@ def validate_finishes(finishes):
         if not (isinstance(score,int) and not isinstance(score,bool) and 75<=score<1000): raise ValueError('Invalid high finish (75+).')
 def save(state):
     pool_count=int(state.get('poolCount',1))
-    if pool_count not in (1,2,4): raise ValueError('Number of pools must be 1, 2, or 4.')
+    if pool_count not in (1,2,4,6,8,10): raise ValueError('Number of pools must be 1, 2, 4, 6, 8, or 10.')
     size=int(state.get('size',4))
     if size not in range(4,9): raise ValueError('Pool size must be 4-8.')
     pools_in=state.get('pools',[])
