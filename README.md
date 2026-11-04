@@ -53,10 +53,10 @@ in plain terms:
    on the TV or projector — it's read-only and cycles through standings and matches on
    its own, nothing to click.
 8. There's a **"Download backup" button** in the header if someone wants a copy of
-   the current data saved to a file, and a light/dark theme toggle next to it. An
-   **"Import backup" button** next to "Reset tournament" does the reverse: pick a
-   previously downloaded backup file and it replaces everything currently on the
-   page, after a confirmation step.
+   the current data saved to a file, and a light/dark theme toggle next to it. The
+   **"Import backup" button** next to it does the reverse: pick a previously
+   downloaded backup file and it replaces everything currently on the page, after
+   a confirmation step. Import needs "Log in to edit" first, same as other changes.
 
 If logins are turned on for your club, anyone can look at the page, but editing names,
 results, and history needs "Log in to edit" in the header first.
