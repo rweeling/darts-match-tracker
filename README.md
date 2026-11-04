@@ -107,6 +107,11 @@ unlocks the names, results, reset, and history controls for that browser (via a
 session cookie) until they log out. Leave `EDITOR_PASSWORD` unset to keep the previous
 behavior, where anyone can edit.
 
+The container itself serves plain HTTP, with no TLS. If it's reachable from anywhere
+other than a trusted local network, put it behind a reverse proxy (nginx, Caddy,
+Traefik, etc.) that terminates HTTPS — otherwise the password and session cookie
+travel in plaintext.
+
 To reset a tournament, stop the container and remove the volume:
 
 ```bash
