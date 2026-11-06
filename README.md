@@ -51,12 +51,15 @@ until that's filled in.
   when the same person got entered under two different names).
 - A "Previous winners" leaderboard across tournaments, with the same merge tooling.
 - An auto-rotating, read-only **big-screen display** for a TV or projector, with its
-  own light/dark theme and an on-screen confetti celebration whenever a 180 or a high
-  finish is recorded.
+  own light/dark theme and an on-screen confetti celebration whenever a 180, a high
+  finish, or a tournament champion is recorded.
 - Light and dark themes on both the editor and the display, remembered per browser.
+- A Dutch/English language toggle on both pages, remembered per browser.
 - One-file JSON backup/import, and optional password-gated editing with everyone
   still able to view.
 - Installable as a home-screen app on a phone (ships a web app manifest).
+- A small, dim build tag in the corner of both pages showing the commit and date the
+  running image was built from, baked in automatically at `docker build` time.
 
 ### Multiple pools
 

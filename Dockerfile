@@ -1,4 +1,11 @@
 # syntax=docker/dockerfile:1
+FROM python:3.12-alpine AS gitinfo
+RUN apk add --no-cache git
+WORKDIR /src
+COPY . .
+RUN git log -1 --format='{"commit":"%h","date":"%ad"}' --date=format:'%Y-%m-%d' > /version.json \
+    || printf '{"commit":"unknown","date":"unknown"}' > /version.json
+
 FROM python:3.12-alpine
 WORKDIR /app
 RUN adduser -D webuser && mkdir -p /data && chown webuser:webuser /data
@@ -6,6 +13,7 @@ COPY darts_schedule_web.html /app/index.html
 COPY darts_display.html /app/display.html
 COPY manifest.json /app/manifest.json
 COPY favicon.svg /app/favicon.svg
+COPY --from=gitinfo /version.json /app/version.json
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json, os, shutil, hmac, hashlib, re
@@ -178,6 +186,10 @@ class Handler(BaseHTTPRequestHandler):
         if path=='/favicon.svg':
             with open('/app/favicon.svg','rb') as f: return self.reply(200,f.read(),'image/svg+xml')
         if path=='/api/state': return self.reply(200,load())
+        if path=='/api/version':
+            try:
+                with open('/app/version.json','rb') as f: return self.reply(200,f.read())
+            except OSError: return self.reply(200,{'commit':'unknown','date':'unknown'})
         if path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
         return self.reply(404,{'error':'Not found'})
     def do_POST(self):
