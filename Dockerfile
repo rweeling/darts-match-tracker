@@ -3,8 +3,10 @@ FROM python:3.12-alpine AS gitinfo
 RUN apk add --no-cache git
 WORKDIR /src
 COPY . .
-RUN git log -1 --format='{"commit":"%h","date":"%ad"}' --date=format:'%Y-%m-%d' > /version.json \
-    || printf '{"commit":"unknown","date":"unknown"}' > /version.json
+RUN VERSION=$(cat VERSION 2>/dev/null || echo '0.0.0') && \
+    COMMIT=$(git log -1 --format='%h' 2>/dev/null || echo unknown) && \
+    DATE=$(git log -1 --format='%ad' --date=format:'%Y-%m-%d' 2>/dev/null || echo unknown) && \
+    printf '{"version":"%s","commit":"%s","date":"%s"}' "$VERSION" "$COMMIT" "$DATE" > /version.json
 
 FROM python:3.12-alpine
 WORKDIR /app

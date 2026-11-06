@@ -48,5 +48,5 @@ async function tick(){try{const r=await fetch('/api/state');if(!r.ok)throw Error
 const params=new URLSearchParams(location.search);
 const ROTATE_MS=(Number(params.get('interval'))||10)*1000;
 const REFRESH_MS=(Number(params.get('refresh'))||5)*1000;
-document.documentElement.lang=currentLang();document.querySelector('#slideTitle').textContent=t('loading');renderLangToggle();renderThemeToggle();fetch('/api/version').then(r=>r.json()).then(v=>{document.querySelector('#vertag').textContent=`${v.commit} · ${v.date}`}).catch(()=>{});tick();setInterval(tick,REFRESH_MS);setInterval(advanceSlide,ROTATE_MS);
+document.documentElement.lang=currentLang();document.querySelector('#slideTitle').textContent=t('loading');renderLangToggle();renderThemeToggle();fetch('/api/version').then(r=>r.json()).then(v=>{const d=new Date(v.date),ds=isNaN(d)?v.date:d.toLocaleDateString(currentLang()==='nl'?'nl-NL':'en-US',{month:'short',day:'numeric',year:'numeric'});document.querySelector('#vertag').textContent=`v${v.version} (${v.commit}, ${ds})`}).catch(()=>{});tick();setInterval(tick,REFRESH_MS);setInterval(advanceSlide,ROTATE_MS);
 </script></body></html>
