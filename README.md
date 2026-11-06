@@ -1,4 +1,33 @@
-# Darts Match Tracker
+<p align="center">
+  <img src="favicon.svg" alt="Darts Match Tracker logo" width="84">
+</p>
+
+<h1 align="center">Darts Match Tracker</h1>
+
+<p align="center">
+  A local-network web app that turns darts tournament night into a guided scoreboard —
+  fill in players, click winners, and the schedule, bracket, and stats take care of
+  themselves.
+</p>
+
+<p align="center">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-brightgreen">
+  <img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue">
+  <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib%20only-informational">
+  <img alt="Deploy: Docker" src="https://img.shields.io/badge/deploy-docker-2496ED">
+</p>
+
+## Contents
+
+- [Features](#features)
+- [Multiple pools](#multiple-pools)
+- [How to use it](#how-to-use-it)
+- [Build and run](#build-and-run)
+  - [Big-screen display](#big-screen-display)
+  - [Read-only mode and login](#read-only-mode-and-login)
+- [Known limitations](#known-limitations)
+- [License](#license)
+- [Contributors](#contributors)
 
 A containerized, single-page darts tournament tracker: a round-robin fixture schedule
 for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd vs 3rd) and a final.
