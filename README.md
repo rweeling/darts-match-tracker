@@ -4,12 +4,30 @@ A containerized, single-page darts tournament tracker: a round-robin fixture sch
 for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd vs 3rd) and a final.
 Fixture patterns for 4, 5, 6, and 7 players follow a fixed match order; 8-player pools
 use an algorithmically generated schedule instead (see "Known limitations" below).
+Within each pool, matches are ordered to avoid the same player playing two matches
+back to back wherever the schedule allows it (for 4 and 5 players, one such pairing is
+mathematically unavoidable with so few matches per round).
 
 Seeding for the top 4 is by pool wins. When two or more players are tied on wins in a
 way that affects who lands in positions 1-4 (the whole top 4, or just part of it, e.g.
 only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a "Bull-off
 needed" card asking for the result of an actual bull-off, and holds the semifinal back
 until that's filled in.
+
+## Features
+
+- Round-robin pools (4-8 players, 1/2/4/6/8/10 pools) feeding a seeded knockout
+  bracket, with bull-off tie-breaks when pool standings don't resolve on their own.
+- Live 180 and high-finish (75+) tracking per player, editable and mergeable (for
+  when the same person got entered under two different names).
+- A "Previous winners" leaderboard across tournaments, with the same merge tooling.
+- An auto-rotating, read-only **big-screen display** for a TV or projector, with its
+  own light/dark theme and an on-screen confetti celebration whenever a 180 or a high
+  finish is recorded.
+- Light and dark themes on both the editor and the display, remembered per browser.
+- One-file JSON backup/import, and optional password-gated editing with everyone
+  still able to view.
+- Installable as a home-screen app on a phone (ships a web app manifest).
 
 ### Multiple pools
 
@@ -44,7 +62,9 @@ in plain terms:
 4. **During a match, log the highlights**: switch to the "Statistics" tab and tap
    "180 thrown" whenever someone throws a 180, or type a score of 75 or higher into
    the finish box and tap "Add" for a big finish. These lists keep running all
-   season, even after you reset for a new tournament.
+   season, even after you reset for a new tournament. If the same player ended up
+   split across two names (a typo, say), use "Merge into…" on either the 180 tally
+   or the "Previous winners" list to combine their totals.
 5. **If the top spots end up tied**, the app will show a "Bull-off needed" card
    asking for a real bull-off to settle the order — just fill in who came out on top.
 6. **When the final is played**, pick the winner and press the button to save it to
@@ -90,7 +110,14 @@ or projector during a competition: large type, no controls. It cycles through ea
 pool's standings and next match, then a slide for the knockout bracket (semis/final, or
 quarterfinals too with 4 pools), polling the server every 5 seconds and advancing every
 10 seconds. Both can be tuned per screen with query parameters, e.g.
-`/display?interval=15&refresh=3`.
+`/display?interval=15&refresh=3`. Once every pool has finished its round-robin, the
+pool-standings slides drop out on their own and it shows only the knockout bracket.
+
+It has its own light/dark theme toggle (a small button in the top-right corner,
+independent of the editor's) and celebrates live: whenever a 180 or a high finish gets
+logged on the editor, the display picks it up on its next poll and runs a short
+confetti burst with the player's name — gold for a 180, teal for a high finish — so the
+room knows what just happened without anyone glancing at a phone.
 
 ### Read-only mode and login
 
