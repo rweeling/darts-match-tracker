@@ -59,7 +59,7 @@ until that's filled in.
   still able to view.
 - Installable as a home-screen app on a phone (ships a web app manifest).
 - A small, dim build tag in the corner of both pages showing the version, commit, and
-  date the running image was built from (e.g. `v1.0.0 (bbfb697, Nov 6, 2026)`), baked
+  date the running image was built from (e.g. `v1.3.6 (bbfb697, Nov 6, 2026)`), baked
   in automatically at `docker build` time from the [VERSION](VERSION) file.
 
 ### Multiple pools
