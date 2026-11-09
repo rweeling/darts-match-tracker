@@ -44,8 +44,9 @@ def bracket_round_names(pc):
         names.append(round_name_for_size(sz)); sz//=2
     return names
 def elim_round_names(n):
+    bs=next_pow2(n)
     names=[]
-    sz=n
+    sz=bs
     while sz>=2:
         names.append(round_name_for_size(sz)); sz//=2
     return names
@@ -53,10 +54,17 @@ def elim_result_keys_for(n):
     names=elim_round_names(n)
     non_final=names[:-1]
     keys=set()
-    cnt=n//2
-    for name in non_final:
-        for j in range(cnt): keys.add(f'{name}-{j}')
-        cnt//=2
+    if non_final:
+        bs=next_pow2(n)
+        order=seed_order(bs)
+        r0name=non_final[0]
+        for i in range(bs//2):
+            if order[2*i]<=n and order[2*i+1]<=n: keys.add(f'{r0name}-{i}')
+        num_prev=bs//2
+        for r in range(1,len(non_final)):
+            num_cur=num_prev//2
+            for j in range(num_cur): keys.add(f'{non_final[r]}-{j}')
+            num_prev=num_cur
     keys.add('final')
     return keys
 def cross_keys_for(pool_count):
@@ -199,7 +207,7 @@ def save(state):
     fmt=state.get('format','pools')
     if fmt not in ('pools','elim'): raise ValueError('Invalid tournament format.')
     elim_size=int(state.get('elimSize',4))
-    if elim_size not in (2,4,8,16): raise ValueError('Elimination player count must be 2, 4, 8, or 16.')
+    if elim_size<2 or elim_size>64 or elim_size%2!=0: raise ValueError('Elimination player count must be an even number from 2 to 64.')
     elim=state.get('elim',default_elim(elim_size))
     validate_elim(elim,elim_size)
     clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes,'format':fmt,'elimSize':elim_size,'elim':elim}
