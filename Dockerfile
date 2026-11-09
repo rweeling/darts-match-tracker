@@ -43,6 +43,22 @@ def bracket_round_names(pc):
     while sz>=2:
         names.append(round_name_for_size(sz)); sz//=2
     return names
+def elim_round_names(n):
+    names=[]
+    sz=n
+    while sz>=2:
+        names.append(round_name_for_size(sz)); sz//=2
+    return names
+def elim_result_keys_for(n):
+    names=elim_round_names(n)
+    non_final=names[:-1]
+    keys=set()
+    cnt=n//2
+    for name in non_final:
+        for j in range(cnt): keys.add(f'{name}-{j}')
+        cnt//=2
+    keys.add('final')
+    return keys
 def cross_keys_for(pool_count):
     if pool_count==1: return set()
     if pool_count==2: return {'sf-0','sf-1','final'}
@@ -76,17 +92,22 @@ def is_authed(handler):
     return bool(token) and hmac.compare_digest(token,make_token())
 def default_pool(size):
     return {'names':[f'Player {i}' for i in range(1,size+1)],'results':{},'bullOrder':{}}
+def default_elim(size):
+    return {'names':[f'Player {i}' for i in range(1,size+1)],'order':list(range(size)),'results':{}}
 def default_state():
-    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[]}
+    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[],'format':'pools','elimSize':4,'elim':default_elim(4)}
 def migrate(data):
     if not isinstance(data,dict): return default_state()
     if 'pools' in data:
         data.setdefault('tally180',{})
         data.setdefault('finishes',[])
+        data.setdefault('format','pools')
+        data.setdefault('elimSize',4)
+        data.setdefault('elim',default_elim(4))
         return data
     size=data.get('size',4)
     if not isinstance(size,int) or size not in range(4,9): size=4
-    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[]),'tally180':{},'finishes':[]}
+    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[]),'tally180':{},'finishes':[],'format':'pools','elimSize':4,'elim':default_elim(4)}
 def load():
     if not os.path.exists(DATA): return default_state()
     with open(DATA,encoding='utf-8') as f: return migrate(json.load(f))
@@ -117,6 +138,18 @@ def validate_cross(cross,pool_count,size):
         if len(parts)!=2 or not all(p.isdigit() for p in parts): raise ValueError('Invalid cross-final winner.')
         p,i=int(parts[0]),int(parts[1])
         if not (0<=p<pool_count and 0<=i<size): raise ValueError('Invalid cross-final winner.')
+def validate_elim(elim,elim_size):
+    if not isinstance(elim,dict): raise ValueError('Invalid elimination data.')
+    names=elim.get('names',[])
+    if not isinstance(names,list) or len(names)!=elim_size or any(not isinstance(x,str) or len(x)>36 for x in names): raise ValueError('Enter a valid name for each player (36 characters max).')
+    order=elim.get('order',[])
+    if not isinstance(order,list) or sorted(order)!=list(range(elim_size)): raise ValueError('Invalid elimination draw order.')
+    results=elim.get('results',{})
+    if not isinstance(results,dict) or len(results)>2*elim_size: raise ValueError('Invalid elimination results.')
+    allowed=elim_result_keys_for(elim_size)
+    for k,v in results.items():
+        if k not in allowed: raise ValueError('Invalid elimination match key.')
+        if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<elim_size): raise ValueError('Invalid elimination winner.')
 def validate_tally180(tally):
     if not isinstance(tally,dict) or len(tally)>200: raise ValueError('Invalid 180 tally.')
     for k,v in tally.items():
@@ -158,12 +191,18 @@ def save(state):
         if not isinstance(h.get('date',''),str) or len(h.get('date',''))>20: raise ValueError('Invalid date in history.')
         if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Invalid champion in history.')
         if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Invalid runner-up in history.')
-        if not isinstance(h.get('size',4),int) or h.get('size',4) not in range(4,9): raise ValueError('Invalid pool size in history.')
+        if not isinstance(h.get('size',4),int) or h.get('size',4) not in (2,4,5,6,7,8,16): raise ValueError('Invalid pool size in history.')
     tally180=state.get('tally180',{})
     validate_tally180(tally180)
     finishes=state.get('finishes',[])
     validate_finishes(finishes)
-    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes}
+    fmt=state.get('format','pools')
+    if fmt not in ('pools','elim'): raise ValueError('Invalid tournament format.')
+    elim_size=int(state.get('elimSize',4))
+    if elim_size not in (2,4,8,16): raise ValueError('Elimination player count must be 2, 4, 8, or 16.')
+    elim=state.get('elim',default_elim(elim_size))
+    validate_elim(elim,elim_size)
+    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes,'format':fmt,'elimSize':elim_size,'elim':elim}
     if os.path.exists(DATA):
         try: shutil.copyfile(DATA,DATA+'.bak')
         except OSError: pass

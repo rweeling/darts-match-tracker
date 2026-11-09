@@ -47,6 +47,8 @@ until that's filled in.
 
 - Round-robin pools (4-8 players, 1/2/4/6/8/10 pools) feeding a seeded knockout
   bracket, with bull-off tie-breaks when pool standings don't resolve on their own.
+- An alternative **single-elimination** format: a straight knockout bracket for
+  2, 4, 8, or 16 players, one random draw, lose once and you're out.
 - Live 180 and high-finish (75+) tracking per player, editable and mergeable (for
   when the same person got entered under two different names).
 - A "Previous winners" leaderboard across tournaments, with the same merge tooling.
@@ -79,6 +81,14 @@ first, then runners-up, in pool order) sit out the first knockout round and adva
 straight through, while the rest play it out. This keeps the #1 and #2 overall seeds
 apart until the final, same as a standard seeded tournament bracket. With 8 pools the
 qualifier count (16) is already a clean power of 2, so there are no byes.
+
+### Single elimination
+
+Pick "Single elimination" under "Tournament format" instead of round-robin pools
+to run a straight knockout for 2, 4, 8, or 16 players. Enter the names, and the
+app deals a random draw into a bracket right away — no pool play first. Pick the
+winner of each match as it's played; lose once and you're out. Only those four
+player counts are supported, so there's never a bye to work around.
 
 ## How to use it
 
