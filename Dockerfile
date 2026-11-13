@@ -101,7 +101,7 @@ def is_authed(handler):
 def default_pool(size):
     return {'names':[f'Player {i}' for i in range(1,size+1)],'results':{},'bullOrder':{}}
 def default_elim(size):
-    return {'names':[f'Player {i}' for i in range(1,size+1)],'order':list(range(size)),'results':{}}
+    return {'names':[f'Player {i}' for i in range(1,size+1)],'order':list(range(size)),'results':{},'drawn':False}
 def default_state():
     return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[],'format':'pools','elimSize':4,'elim':default_elim(4)}
 def migrate(data):
@@ -112,6 +112,8 @@ def migrate(data):
         data.setdefault('format','pools')
         data.setdefault('elimSize',4)
         data.setdefault('elim',default_elim(4))
+        elim=data.get('elim')
+        if isinstance(elim,dict): elim.setdefault('drawn',True)
         return data
     size=data.get('size',4)
     if not isinstance(size,int) or size not in range(4,9): size=4
@@ -158,6 +160,7 @@ def validate_elim(elim,elim_size):
     for k,v in results.items():
         if k not in allowed: raise ValueError('Invalid elimination match key.')
         if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<elim_size): raise ValueError('Invalid elimination winner.')
+    if not isinstance(elim.get('drawn',False),bool): raise ValueError('Invalid elimination draw flag.')
 def validate_tally180(tally):
     if not isinstance(tally,dict) or len(tally)>200: raise ValueError('Invalid 180 tally.')
     for k,v in tally.items():
