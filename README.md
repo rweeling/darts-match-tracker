@@ -155,8 +155,11 @@ or projector during a competition: large type, no controls. It cycles through ea
 pool's standings and next match, then a slide for the knockout bracket (semis/final, or
 quarterfinals too with 4 pools), polling the server every 5 seconds and advancing every
 10 seconds. Both can be tuned per screen with query parameters, e.g.
-`/display?interval=15&refresh=3`. Once every pool has finished its round-robin, the
-pool-standings slides drop out on their own and it shows only the knockout bracket.
+`/display?interval=15&refresh=3`. The knockout bracket slide only joins the rotation
+once at least one pool has produced a qualifier, so it doesn't waste a slide showing
+nothing but "Not yet known" while pool play is still getting started. Once every pool
+has finished its round-robin, the pool-standings slides drop out on their own and it
+shows only the knockout bracket.
 
 It has its own light/dark theme toggle (a small button in the top-right corner,
 independent of the editor's) and celebrates live: whenever a 180 or a high finish gets
