@@ -49,8 +49,10 @@ until that's filled in.
   bracket, with bull-off tie-breaks when pool standings don't resolve on their own.
 - An alternative **single-elimination** format: a straight knockout bracket for
   any even number of players, one random draw, lose once and you're out.
-- Live 180 and high-finish (75+) tracking per player, editable and mergeable (for
-  when the same person got entered under two different names).
+- Live 180 and high-finish (50+) tracking per player, editable and mergeable (for
+  when the same person got entered under two different names). Only scores that
+  are actually possible as a 3-dart checkout (50-170, excluding 159, 162, 163,
+  165, 166, 168, and 169) can be entered.
 - A "Previous winners" leaderboard across tournaments, with the same merge tooling.
 - An auto-rotating, read-only **big-screen display** for a TV or projector, with its
   own light/dark theme and an on-screen confetti celebration whenever a 180, a high
@@ -105,8 +107,9 @@ in plain terms:
    winner from the dropdown in that cell. Everyone's win count and the knockout
    bracket update themselves right away.
 4. **During a match, log the highlights**: switch to the "Statistics" tab and tap
-   "180 thrown" whenever someone throws a 180, or type a score of 75 or higher into
-   the finish box and tap "Add" for a big finish. These lists keep running all
+   "180 thrown" whenever someone throws a 180, or type a score of 50 or higher into
+   the finish box and tap "Add" for a big finish (anything that isn't a real
+   3-dart checkout is rejected). These lists keep running all
    season, even after you reset for a new tournament. If the same player ended up
    split across two names (a typo, say), use "Merge into…" on either the 180 tally
    or the "Previous winners" list to combine their totals.

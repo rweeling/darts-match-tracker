@@ -163,6 +163,7 @@ def validate_tally180(tally):
     for k,v in tally.items():
         if not isinstance(k,str) or not k or len(k)>36: raise ValueError('Invalid player name for 180 tally.')
         if not (isinstance(v,int) and not isinstance(v,bool) and 0<=v<=100000): raise ValueError('Invalid 180 count.')
+IMPOSSIBLE_FINISHES={159,162,163,165,166,168,169}
 def validate_finishes(finishes):
     if not isinstance(finishes,list) or len(finishes)>2000: raise ValueError('Invalid list of high finishes.')
     for e in finishes:
@@ -170,7 +171,7 @@ def validate_finishes(finishes):
         if not isinstance(e.get('date',''),str) or len(e.get('date',''))>20: raise ValueError('Invalid date for high finish.')
         if not isinstance(e.get('player',''),str) or not e.get('player','') or len(e.get('player',''))>36: raise ValueError('Invalid player name for high finish.')
         score=e.get('score')
-        if not (isinstance(score,int) and not isinstance(score,bool) and 75<=score<1000): raise ValueError('Invalid high finish (75+).')
+        if not (isinstance(score,int) and not isinstance(score,bool) and 50<=score<=170 and score not in IMPOSSIBLE_FINISHES): raise ValueError('Invalid high finish: not a possible 3-dart checkout from 50-170.')
 def save(state):
     pool_count=int(state.get('poolCount',1))
     if pool_count not in (1,2,4,6,8,10): raise ValueError('Number of pools must be 1, 2, 4, 6, 8, or 10.')
