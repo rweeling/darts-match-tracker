@@ -58,8 +58,8 @@ until that's filled in.
   finish, or a tournament champion is recorded.
 - Light and dark themes on both the editor and the display, remembered per browser.
 - A Dutch/English language toggle on both pages, remembered per browser.
-- One-file JSON backup/import, and optional password-gated editing with everyone
-  still able to view.
+- One-file JSON backup/import, with password-gated editing (everyone can still view)
+  required on every running container.
 - Installable as a home-screen app on a phone (ships a web app manifest).
 - A small, dim build tag in the corner of both pages showing the version, commit, and
   date the running image was built from (e.g. `v1.3.6 (bbfb697, Nov 6, 2026)`), baked
@@ -131,8 +131,8 @@ in plain terms:
    downloaded backup file and it replaces everything currently on the page, after
    a confirmation step. Import needs "Log in to edit" first, same as other changes.
 
-If logins are turned on for your club, anyone can look at the page, but editing names,
-results, and history needs "Log in to edit" in the header first.
+Anyone can look at the page, but editing names, results, and history needs "Log in to
+edit" in the header first.
 
 ## Build and run
 
@@ -141,10 +141,12 @@ docker build -t darts-tracker .
 ```
 
 ```bash
-docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data darts-tracker
+docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
+  -e EDITOR_PASSWORD=yourpassword darts-tracker
 ```
 
-Open `http://localhost:8080`. State (player names, results, and tournament history) is
+`EDITOR_PASSWORD` is required — the container refuses to start without it (see
+"Read-only mode and login" below). Open `http://localhost:8080`. State (player names, results, and tournament history) is
 stored in the `darts-data` volume at `/data/state.json` and shared with everyone who
 opens the page. Use "Download backup" in the header to save a copy of the current state
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
@@ -180,18 +182,17 @@ the confetti has settled.
 
 ### Read-only mode and login
 
-Set `EDITOR_PASSWORD` when starting the container to make the page read-only for anyone
-who hasn't logged in with that password:
+`EDITOR_PASSWORD` must be set when starting the container — the server exits
+immediately with an error if it's missing, so the page can never run open to anyone:
 
 ```bash
 docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
   -e EDITOR_PASSWORD=yourpassword darts-tracker
 ```
 
-Everyone can still view the page and download backups. "Log in to edit" in the header
-unlocks the names, results, reset, and history controls for that browser (via a
-session cookie) until they log out. Leave `EDITOR_PASSWORD` unset to keep the previous
-behavior, where anyone can edit.
+Everyone can still view the page and download backups without logging in. "Log in to
+edit" in the header unlocks the names, results, reset, and history controls for that
+browser (via a session cookie) until they log out.
 
 The container itself serves plain HTTP, with no TLS. If it's reachable from anywhere
 other than a trusted local network, put it behind a reverse proxy (nginx, Caddy,

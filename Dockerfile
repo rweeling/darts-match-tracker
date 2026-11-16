@@ -18,10 +18,12 @@ COPY favicon.svg /app/favicon.svg
 COPY --from=gitinfo /version.json /app/version.json
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os, shutil, hmac, hashlib, re
+import json, os, shutil, hmac, hashlib, re, sys
 
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
+if not EDITOR_PASSWORD:
+    sys.exit('EDITOR_PASSWORD must be set. Start the container with -e EDITOR_PASSWORD=yourpassword.')
 MATCH_ID_RE=re.compile(r'^\d+-\d+$')
 def seed_order(n):
     if n==1: return [1]
@@ -112,7 +114,6 @@ def get_cookie(handler,name):
         if part.startswith(name+'='): return part[len(name)+1:]
     return None
 def is_authed(handler):
-    if not EDITOR_PASSWORD: return True
     token=get_cookie(handler,'session')
     return bool(token) and hmac.compare_digest(token,make_token())
 def default_pool(size):
@@ -268,14 +269,14 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 with open('/app/version.json','rb') as f: return self.reply(200,f.read())
             except OSError: return self.reply(200,{'commit':'unknown','date':'unknown'})
-        if path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':bool(EDITOR_PASSWORD)})
+        if path=='/api/auth': return self.reply(200,{'authed':is_authed(self),'loginRequired':True})
         return self.reply(404,{'error':'Not found'})
     def do_POST(self):
         if self.path=='/api/login':
             try: body=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
             except json.JSONDecodeError: return self.reply(400,{'error':'Invalid request'})
             password=str(body.get('password',''))
-            if not EDITOR_PASSWORD or hmac.compare_digest(password,EDITOR_PASSWORD):
+            if hmac.compare_digest(password,EDITOR_PASSWORD):
                 return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':f'session={make_token()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=15552000'})
             return self.reply(401,{'error':'Incorrect password'})
         if self.path=='/api/logout':
