@@ -18,12 +18,36 @@ COPY favicon.svg /app/favicon.svg
 COPY --from=gitinfo /version.json /app/version.json
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os, shutil, hmac, hashlib, re, sys
+import json, os, shutil, hmac, hashlib, re, sys, time, threading
 
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
 if not EDITOR_PASSWORD:
     sys.exit('EDITOR_PASSWORD must be set. Start the container with -e EDITOR_PASSWORD=yourpassword.')
+LOGIN_MAX_ATTEMPTS=5
+LOGIN_LOCKOUT_SECONDS=300
+LOGIN_ATTEMPTS={}
+LOGIN_LOCK=threading.Lock()
+def login_rate_limited(ip):
+    now=time.time()
+    with LOGIN_LOCK:
+        if len(LOGIN_ATTEMPTS)>1000:
+            for k,v in list(LOGIN_ATTEMPTS.items()):
+                if v['locked_until']<now and v['fails']==0: del LOGIN_ATTEMPTS[k]
+        entry=LOGIN_ATTEMPTS.get(ip)
+        if entry and entry['locked_until']>now: return entry['locked_until']-now
+    return 0
+def login_record_failure(ip):
+    now=time.time()
+    with LOGIN_LOCK:
+        entry=LOGIN_ATTEMPTS.setdefault(ip,{'fails':0,'locked_until':0.0})
+        entry['fails']+=1
+        if entry['fails']>=LOGIN_MAX_ATTEMPTS:
+            entry['locked_until']=now+LOGIN_LOCKOUT_SECONDS
+            entry['fails']=0
+def login_record_success(ip):
+    with LOGIN_LOCK:
+        LOGIN_ATTEMPTS.pop(ip,None)
 MATCH_ID_RE=re.compile(r'^\d+-\d+$')
 def seed_order(n):
     if n==1: return [1]
@@ -273,11 +297,16 @@ class Handler(BaseHTTPRequestHandler):
         return self.reply(404,{'error':'Not found'})
     def do_POST(self):
         if self.path=='/api/login':
+            ip=self.client_address[0]
+            retry_after=login_rate_limited(ip)
+            if retry_after>0: return self.reply(429,{'error':f'Too many attempts. Try again in {int(retry_after)+1}s.'})
             try: body=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
             except json.JSONDecodeError: return self.reply(400,{'error':'Invalid request'})
             password=str(body.get('password',''))
             if hmac.compare_digest(password,EDITOR_PASSWORD):
+                login_record_success(ip)
                 return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':f'session={make_token()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=15552000'})
+            login_record_failure(ip)
             return self.reply(401,{'error':'Incorrect password'})
         if self.path=='/api/logout':
             return self.reply(200,{'authed':False},extra_headers={'Set-Cookie':'session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'})

@@ -146,7 +146,14 @@ docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
 ```
 
 `EDITOR_PASSWORD` is required — the container refuses to start without it (see
-"Read-only mode and login" below). Open `http://localhost:8080`. State (player names, results, and tournament history) is
+"Read-only mode and login" below). Open `http://localhost:8080`.
+
+Or with Docker Compose — edit the password in [docker-compose.yml](docker-compose.yml)
+first, then:
+
+```bash
+docker compose up -d
+``` State (player names, results, and tournament history) is
 stored in the `darts-data` volume at `/data/state.json` and shared with everyone who
 opens the page. Use "Download backup" in the header to save a copy of the current state
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
@@ -192,7 +199,8 @@ docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
 
 Everyone can still view the page and download backups without logging in. "Log in to
 edit" in the header unlocks the names, results, reset, and history controls for that
-browser (via a session cookie) until they log out.
+browser (via a session cookie) until they log out. After 5 wrong passwords from the
+same address, login is locked out for 5 minutes to slow down password guessing.
 
 The container itself serves plain HTTP, with no TLS. If it's reachable from anywhere
 other than a trusted local network, put it behind a reverse proxy (nginx, Caddy,

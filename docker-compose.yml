@@ -1,0 +1,13 @@
+services:
+  darts-tracker:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - darts-data:/data
+    environment:
+      - EDITOR_PASSWORD=yourpassword
+    restart: unless-stopped
+
+volumes:
+  darts-data:
