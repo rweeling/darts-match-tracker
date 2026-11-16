@@ -5,9 +5,8 @@
 <h1 align="center">Darts Match Tracker</h1>
 
 <p align="center">
-  A local-network web app that turns darts tournament night into a guided scoreboard —
-  fill in players, click winners, and the schedule, bracket, and stats take care of
-  themselves.
+  Built for dart night: fill in players, click winners, and the schedule, bracket, and
+  stats take care of themselves — no spreadsheet, no whiteboard.
 </p>
 
 <p align="center">
