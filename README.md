@@ -91,11 +91,13 @@ player count and fill in names as people show up — if more arrive, just raise
 the count and the names you already typed stay put. When everyone's in, press
 "Draw" to randomly set the bracket; nothing is drawn before that, so changing
 the player count never discards a name. When the player count isn't a clean
-power of 2, the bracket is seeded with byes the same way the multi-pool cross
-bracket is (see "Multiple pools" above) — based on that same random draw, so
-which players sit out the first round and advance straight through is itself
-part of the luck of the draw. Changing the player count after drawing clears
-the bracket and asks for a new draw, since the whole structure depends on it.
+power of 2, nobody sits out: everyone plays a first match, and if that still
+doesn't leave a clean power of 2, a short preliminary round between just
+enough of those winners narrows the field down before the main bracket
+(quarterfinals, semifinals, etc.) begins — the same random draw decides who
+plays in that preliminary round and who advances straight through it.
+Changing the player count after drawing clears the bracket and asks for a
+new draw, since the whole structure depends on it.
 
 ## How to use it
 

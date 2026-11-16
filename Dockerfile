@@ -34,6 +34,10 @@ def next_pow2(n):
     p=1
     while p<n: p*=2
     return p
+def prev_pow2(n):
+    p=1
+    while p*2<=n: p*=2
+    return p
 def round_name_for_size(sz):
     return 'final' if sz==2 else 'sf' if sz==4 else 'qf' if sz==8 else f'r{sz}'
 def bracket_round_names(pc):
@@ -44,9 +48,17 @@ def bracket_round_names(pc):
         names.append(round_name_for_size(sz)); sz//=2
     return names
 def elim_round_names(n):
-    bs=next_pow2(n)
-    names=[]
-    sz=bs
+    if n<=2: return ['final']
+    if n==next_pow2(n):
+        names=[]
+        sz=n
+        while sz>=2:
+            names.append(round_name_for_size(sz)); sz//=2
+        return names
+    m=n//2
+    p=prev_pow2(m)
+    names=[f'r{n}','prelim']
+    sz=p
     while sz>=2:
         names.append(round_name_for_size(sz)); sz//=2
     return names
@@ -55,13 +67,18 @@ def elim_result_keys_for(n):
     non_final=names[:-1]
     keys=set()
     if non_final:
-        bs=next_pow2(n)
-        order=seed_order(bs)
-        r0name=non_final[0]
-        for i in range(bs//2):
-            if order[2*i]<=n and order[2*i+1]<=n: keys.add(f'{r0name}-{i}')
-        num_prev=bs//2
-        for r in range(1,len(non_final)):
+        if n==next_pow2(n):
+            for i in range(n//2): keys.add(f'{non_final[0]}-{i}')
+            num_prev=n//2
+            start=1
+        else:
+            m=n//2
+            p=prev_pow2(m)
+            for i in range(m): keys.add(f'{non_final[0]}-{i}')
+            for j in range(m-p): keys.add(f'{non_final[1]}-{j}')
+            num_prev=p
+            start=2
+        for r in range(start,len(non_final)):
             num_cur=num_prev//2
             for j in range(num_cur): keys.add(f'{non_final[r]}-{j}')
             num_prev=num_cur
@@ -113,7 +130,14 @@ def migrate(data):
         data.setdefault('elimSize',4)
         data.setdefault('elim',default_elim(4))
         elim=data.get('elim')
-        if isinstance(elim,dict): elim.setdefault('drawn',True)
+        if isinstance(elim,dict):
+            elim.setdefault('drawn',True)
+            size=data.get('elimSize',4)
+            if not isinstance(size,int) or size<2 or size>64 or size%2: size=4
+            results=elim.get('results')
+            if isinstance(results,dict):
+                allowed=elim_result_keys_for(size)
+                elim['results']={k:v for k,v in results.items() if k in allowed}
         return data
     size=data.get('size',4)
     if not isinstance(size,int) or size not in range(4,9): size=4
@@ -203,7 +227,8 @@ def save(state):
         if not isinstance(h.get('date',''),str) or len(h.get('date',''))>20: raise ValueError('Invalid date in history.')
         if not isinstance(h.get('champion',''),str) or len(h.get('champion',''))>36: raise ValueError('Invalid champion in history.')
         if not isinstance(h.get('runnerUp',''),str) or len(h.get('runnerUp',''))>36: raise ValueError('Invalid runner-up in history.')
-        if not isinstance(h.get('size',4),int) or h.get('size',4) not in (2,4,5,6,7,8,16): raise ValueError('Invalid pool size in history.')
+        sz=h.get('size',4)
+        if isinstance(sz,bool) or not isinstance(sz,int) or not ((4<=sz<=8) or (2<=sz<=64 and sz%2==0)): raise ValueError('Invalid pool size in history.')
     tally180=state.get('tally180',{})
     validate_tally180(tally180)
     finishes=state.get('finishes',[])
