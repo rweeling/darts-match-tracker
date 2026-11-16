@@ -136,6 +136,11 @@ edit" in the header first.
 
 ## Build and run
 
+> **Don't expose this directly to the internet.** The container serves plain HTTP,
+> with no TLS, and has no protection against anything beyond login-password guessing.
+> Only run it on a trusted local network, or behind a reverse proxy (nginx, Caddy,
+> Traefik, etc.) that terminates HTTPS — see "Read-only mode and login" below.
+
 ```bash
 docker build -t darts-tracker .
 ```
@@ -202,10 +207,10 @@ edit" in the header unlocks the names, results, reset, and history controls for 
 browser (via a session cookie) until they log out. After 5 wrong passwords from the
 same address, login is locked out for 5 minutes to slow down password guessing.
 
-The container itself serves plain HTTP, with no TLS. If it's reachable from anywhere
-other than a trusted local network, put it behind a reverse proxy (nginx, Caddy,
-Traefik, etc.) that terminates HTTPS — otherwise the password and session cookie
-travel in plaintext.
+The container itself serves plain HTTP, with no TLS — see the warning under "Build
+and run" above. If it needs to be reachable from anywhere other than a trusted local
+network, put it behind a reverse proxy (nginx, Caddy, Traefik, etc.) that terminates
+HTTPS; otherwise the password and session cookie travel in plaintext.
 
 To reset a tournament, stop the container and remove the volume:
 
