@@ -6,7 +6,7 @@
 
 <p align="center">
   Built for dart night: fill in players, click winners, and the schedule, bracket, and
-  stats take care of themselves — no spreadsheet, no whiteboard.
+  stats take care of themselves. No spreadsheet, no whiteboard.
 </p>
 
 <p align="center">
@@ -38,7 +38,7 @@ mathematically unavoidable with so few matches per round).
 
 Seeding for the top 4 is by pool wins. When two or more players are tied on wins in a
 way that affects who lands in positions 1-4 (the whole top 4, or just part of it, e.g.
-only 3rd/4th, or 2nd-4th), the app can't break the tie on its own — it shows a "Bull-off
+only 3rd/4th, or 2nd-4th), the app can't break the tie on its own. It shows a "Bull-off
 needed" card asking for the result of an actual bull-off, and holds the semifinal back
 until that's filled in.
 
@@ -76,7 +76,7 @@ pool B's #1 plays pool A's #2, then the two winners meet in the final; with 4 po
 the same cross-seeding happens within each pair of pools (A/B and C/D) as a
 quarterfinal round first. All pools share one pool size.
 
-With 6, 8, or 10 pools there are 12, 16, or 20 qualifiers — not a clean power of 2 —
+With 6, 8, or 10 pools there are 12, 16, or 20 qualifiers (not a clean power of 2),
 so the bracket is seeded with "byes": the strongest-seeded qualifiers (pool winners
 first, then runners-up, in pool order) sit out the first knockout round and advance
 straight through, while the rest play it out. This keeps the #1 and #2 overall seeds
@@ -87,14 +87,14 @@ qualifier count (16) is already a clean power of 2, so there are no byes.
 
 Pick "Single elimination" under "Tournament format" instead of round-robin pools
 to run a straight knockout for any even number of players (2 to 64). Set the
-player count and fill in names as people show up — if more arrive, just raise
+player count and fill in names as people show up. If more arrive, just raise
 the count and the names you already typed stay put. When everyone's in, press
 "Draw" to randomly set the bracket; nothing is drawn before that, so changing
 the player count never discards a name. When the player count isn't a clean
 power of 2, nobody sits out: everyone plays a first match, and if that still
 doesn't leave a clean power of 2, a short preliminary round between just
 enough of those winners narrows the field down before the main bracket
-(quarterfinals, semifinals, etc.) begins — the same random draw decides who
+(quarterfinals, semifinals, etc.) begins. The same random draw decides who
 plays in that preliminary round and who advances straight through it.
 Changing the player count after drawing clears the bracket and asks for a
 new draw, since the whole structure depends on it.
@@ -105,9 +105,9 @@ This is the website your club opens on match night to keep score. Here's what to
 in plain terms:
 
 1. **Open the page** in a browser (on a laptop, tablet, or phone) at the address your
-   club gives you — e.g. `http://192.168.x.x:8080`, or whatever address was set up.
+   club gives you (e.g. `http://192.168.x.x:8080`, or whatever address was set up).
 2. **Fill in the player names** for each pool, under "Player names". These save
-   automatically as you type — no save button needed.
+   automatically as you type: no save button needed.
 3. **As each match finishes**, find that match in the schedule grid and pick the
    winner from the dropdown in that cell. Everyone's win count and the knockout
    bracket update themselves right away.
@@ -119,11 +119,11 @@ in plain terms:
    split across two names (a typo, say), use "Merge into…" on either the 180 tally
    or the "Previous winners" list to combine their totals.
 5. **If the top spots end up tied**, the app will show a "Bull-off needed" card
-   asking for a real bull-off to settle the order — just fill in who came out on top.
+   asking for a real bull-off to settle the order: just fill in who came out on top.
 6. **When the final is played**, pick the winner and press the button to save it to
    "Previous winners" and start a fresh night.
 7. **Put the big screen up**: open `/display` (e.g. `http://192.168.x.x:8080/display`)
-   on the TV or projector — it's read-only and cycles through standings and matches on
+   on the TV or projector. It's read-only and cycles through standings and matches on
    its own, nothing to click.
 8. There's a **"Download backup" button** in the header if someone wants a copy of
    the current data saved to a file, and a light/dark theme toggle next to it. The
@@ -139,7 +139,7 @@ edit" in the header first.
 > **Don't expose this directly to the internet.** The container serves plain HTTP,
 > with no TLS, and has no protection against anything beyond login-password guessing.
 > Only run it on a trusted local network, or behind a reverse proxy (nginx, Caddy,
-> Traefik, etc.) that terminates HTTPS — see "Read-only mode and login" below.
+> Traefik, etc.) that terminates HTTPS. See "Read-only mode and login" below.
 
 ```bash
 docker build -t darts-tracker .
@@ -150,15 +150,17 @@ docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
   -e EDITOR_PASSWORD=yourpassword darts-tracker
 ```
 
-`EDITOR_PASSWORD` is required — the container refuses to start without it (see
+`EDITOR_PASSWORD` is required. The container refuses to start without it (see
 "Read-only mode and login" below). Open `http://localhost:8080`.
 
-Or with Docker Compose — edit the password in [docker-compose.yml](docker-compose.yml)
-first, then:
+With Docker Compose, edit the password in [docker-compose.yml](docker-compose.yml)
+first, then run:
 
 ```bash
 docker compose up -d
-``` State (player names, results, and tournament history) is
+```
+
+State (player names, results, and tournament history) is
 stored in the `darts-data` volume at `/data/state.json` and shared with everyone who
 opens the page. Use "Download backup" in the header to save a copy of the current state
 as a JSON file. The page can also be added to a phone's home screen (it ships a web app
@@ -166,7 +168,7 @@ manifest for this).
 
 As a safety net, the server also keeps `state.json.bak` in that same volume: a copy of
 the state from just before the most recent save, in case a save goes wrong (for example
-an accidental "Import backup" of the wrong file). There's no restore button for it — it
+an accidental "Import backup" of the wrong file). There's no restore button for it. It
 can only be put back by someone with access to the volume, by copying it over
 `state.json` and restarting the container.
 
@@ -186,7 +188,7 @@ shows only the knockout bracket.
 It has its own light/dark theme toggle (a small button in the top-right corner,
 independent of the editor's) and celebrates live: whenever a 180 or a high finish gets
 logged on the editor, the display picks it up on its next poll and runs a short
-confetti burst with the player's name — gold for a 180, teal for a high finish — so the
+confetti burst with the player's name (gold for a 180, teal for a high finish), so the
 room knows what just happened without anyone glancing at a phone. That moment isn't
 just a flash, either: each pool's standings keep a small badge next to a player's name
 for every 180 and high finish they've racked up, so the tally stays visible long after
@@ -194,7 +196,7 @@ the confetti has settled.
 
 ### Read-only mode and login
 
-`EDITOR_PASSWORD` must be set when starting the container — the server exits
+`EDITOR_PASSWORD` must be set when starting the container. The server exits
 immediately with an error if it's missing, so the page can never run open to anyone:
 
 ```bash
@@ -207,7 +209,7 @@ edit" in the header unlocks the names, results, reset, and history controls for 
 browser (via a session cookie) until they log out. After 5 wrong passwords from the
 same address, login is locked out for 5 minutes to slow down password guessing.
 
-The container itself serves plain HTTP, with no TLS — see the warning under "Build
+The container itself serves plain HTTP, with no TLS. See the warning under "Build
 and run" above. If it needs to be reachable from anywhere other than a trusted local
 network, put it behind a reverse proxy (nginx, Caddy, Traefik, etc.) that terminates
 HTTPS; otherwise the password and session cookie travel in plaintext.
@@ -231,9 +233,9 @@ docker volume rm darts-data
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
 
 ## Contributors
 
 - Ramon Weeling ([@rweeling](https://github.com/rweeling))
-- Claude (Anthropic) — AI pair-programming assistant
+- Claude (Anthropic), AI pair-programming assistant
