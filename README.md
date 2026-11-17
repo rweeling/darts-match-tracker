@@ -105,7 +105,7 @@ This is the website your club opens on match night to keep score. Here's what to
 in plain terms:
 
 1. **Open the page** in a browser (on a laptop, tablet, or phone) at the address your
-   club gives you (e.g. `http://192.168.x.x:8080`, or whatever address was set up).
+   club gives you (e.g. `http://<ip address>:8080`, or whatever address was set up).
 2. **Fill in the player names** for each pool, under "Player names". These save
    automatically as you type: no save button needed.
 3. **As each match finishes**, find that match in the schedule grid and pick the
@@ -122,7 +122,7 @@ in plain terms:
    asking for a real bull-off to settle the order: just fill in who came out on top.
 6. **When the final is played**, pick the winner and press the button to save it to
    "Previous winners" and start a fresh night.
-7. **Put the big screen up**: open `/display` (e.g. `http://192.168.x.x:8080/display`)
+7. **Put the big screen up**: open `/display` (e.g. `http://<ip address>:8080/display`)
    on the TV or projector. It's read-only and cycles through standings and matches on
    its own, nothing to click.
 8. There's a **"Download backup" button** in the header if someone wants a copy of
@@ -151,7 +151,7 @@ docker run -d --name darts-tracker -p 8080:8080 -v darts-data:/data \
 ```
 
 `EDITOR_PASSWORD` is required. The container refuses to start without it (see
-"Read-only mode and login" below). Open `http://localhost:8080`.
+"Read-only mode and login" below). Open `http://<ip address>:8080`.
 
 With Docker Compose, edit the password in [docker-compose.yml](docker-compose.yml)
 first, then run:
@@ -174,7 +174,7 @@ can only be put back by someone with access to the volume, by copying it over
 
 ### Big-screen display
 
-`http://localhost:8080/display` is a read-only, auto-rotating scoreboard meant for a TV
+`http://<ip address>:8080/display` is a read-only, auto-rotating scoreboard meant for a TV
 or projector during a competition: large type, no controls. It cycles through each
 pool's standings and next match, then a slide for the knockout bracket (semis/final, or
 quarterfinals too with 4 pools), polling the server every 5 seconds and advancing every
