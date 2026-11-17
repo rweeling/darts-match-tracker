@@ -30,8 +30,8 @@
 
 A containerized, single-page darts tournament tracker: a round-robin fixture schedule
 for a pool of 4-8 players, with semifinals (1st vs 4th, 2nd vs 3rd) and a final.
-Fixture patterns for 4, 5, 6, and 7 players follow a fixed match order; 8-player pools
-use an algorithmically generated schedule instead (see "Known limitations" below).
+Fixture patterns for 4, 5, and 6 players follow a fixed match order; 7- and 8-player
+pools use an algorithmically generated schedule instead (see "Known limitations" below).
 Within each pool, matches are ordered to avoid the same player playing two matches
 back to back wherever the schedule allows it (for 4 and 5 players, one such pairing is
 mathematically unavoidable with so few matches per round).
@@ -226,9 +226,10 @@ docker volume rm darts-data
 
 ## Known limitations
 
-- **8-player pools** use an algorithmically generated round-robin schedule rather than
-  a fixed match-order table (every pair plays exactly once across 7 rounds), unlike the
-  fixed patterns used for 4-7 players.
+- **7- and 8-player pools** use an algorithmically generated round-robin schedule rather
+  than a fixed match-order table (every pair plays exactly once, with each player
+  sitting out exactly one round for 7 players), unlike the fixed patterns used for
+  4-6 players.
 - Only 1, 2, 4, 6, 8, or 10 pools are supported per running container (not an
   arbitrary count). 6 and 10 pools use a seeded knockout bracket with byes (see
   "Multiple pools" above) rather than a clean power-of-2 bracket. All pools in a

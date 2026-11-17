@@ -18,7 +18,7 @@
 <details class="card" id="historyCard"><summary class="section-head hist-toggle"><h2 data-i18n="prevWinners">Previous winners</h2><span><span class="chevron" aria-hidden="true">&#9656;</span></span></summary><div class="table-wrap"><table id="history"></table></div><p class="hint" id="historyHint"></p><h3 class="subhead" data-i18n="allResultsHeading">All results</h3><div class="table-wrap"><table id="historyLog"></table></div><p class="hint" data-i18n="historyLogHint">Edit fixes a date or misspelled name; Delete removes a result.</p></details>
 </div>
 </fieldset><div class="vertag" id="vertag"></div></main><script>
-const patterns={4:[[2,3,4],[1,4,3],[4,1,2],[3,2,1]],5:[[2,5,4,3],[1,4,5,3],[4,5,1,2],[3,2,1,5],[1,3,2,4]],6:[[2,6,4,5,3],[1,3,6,4,5],[4,2,5,6,1],[3,5,1,2,6],[6,4,3,1,2],[5,1,2,3,4]],7:[[6,4,7,5,2,3],[5,3,7,6,4,1],[4,2,6,5,7,1],[3,1,5,2,6,7],[2,7,4,3,1,6],[1,3,2,7,4,5],[5,2,1,6,3,4]]};
+const patterns={4:[[2,3,4],[1,4,3],[4,1,2],[3,2,1]],5:[[2,5,4,3],[1,4,5,3],[4,5,1,2],[3,2,1,5],[1,3,2,4]],6:[[2,6,4,5,3],[1,3,6,4,5],[4,2,5,6,1],[3,5,1,2,6],[6,4,3,1,2],[5,1,2,3,4]]};
 const POOL_LETTERS='ABCDEFGHIJ';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IMPOSSIBLE_FINISHES=new Set([159,162,163,165,166,168,169]);
