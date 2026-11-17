@@ -18,6 +18,7 @@
 
 ## Contents
 
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Multiple pools](#multiple-pools)
 - [How to use it](#how-to-use-it)
@@ -41,6 +42,17 @@ way that affects who lands in positions 1-4 (the whole top 4, or just part of it
 only 3rd/4th, or 2nd-4th), the app can't break the tie on its own. It shows a "Bull-off
 needed" card asking for the result of an actual bull-off, and holds the semifinal back
 until that's filled in.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Fixture schedule and standings](screenshots/schedule-standings.jpg)<br>Fixture schedule and live standings | ![Semifinals and final](screenshots/semifinal-final.jpg)<br>Semifinals and final, once the pool resolves |
+| ![Statistics tab](screenshots/statistics.jpg)<br>180s, high finishes, and previous winners | ![Single-elimination bracket](screenshots/elimination-bracket.jpg)<br>The single-elimination bracket |
+
+![Big-screen display](screenshots/display-bracket.jpg)
+
+The big-screen display, cycling through standings and bracket slides on its own.
 
 ## Features
 
