@@ -206,8 +206,10 @@ logged on the editor, the display picks it up on its next poll and runs a short
 confetti burst with the player's name (gold for a 180, teal for a high finish), so the
 room knows what just happened without anyone glancing at a phone. That moment isn't
 just a flash, either: each pool's standings keep a small badge next to a player's name
-for every 180 and high finish they've racked up, so the tally stays visible long after
-the confetti has settled.
+for every 180 and high finish of the current tournament, so the tally stays visible long
+after the confetti has settled. It resets with each new tournament: the 180 and
+high-finish lists themselves keep running all season (see "How to use it" above), but
+the badges only ever show what happened since the last reset or new day.
 
 ### Read-only mode and login
 

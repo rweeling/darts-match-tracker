@@ -145,12 +145,14 @@ def default_pool(size):
 def default_elim(size):
     return {'names':[f'Player {i}' for i in range(1,size+1)],'order':list(range(size)),'results':{},'drawn':False}
 def default_state():
-    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[],'format':'pools','elimSize':4,'elim':default_elim(4)}
+    return {'poolCount':1,'size':4,'pools':[default_pool(4)],'cross':{},'date':'','history':[],'tally180':{},'finishes':[],'tally180Baseline':{},'finishesBaseline':0,'format':'pools','elimSize':4,'elim':default_elim(4)}
 def migrate(data):
     if not isinstance(data,dict): return default_state()
     if 'pools' in data:
         data.setdefault('tally180',{})
         data.setdefault('finishes',[])
+        data.setdefault('tally180Baseline',{})
+        data.setdefault('finishesBaseline',0)
         data.setdefault('format','pools')
         data.setdefault('elimSize',4)
         data.setdefault('elim',default_elim(4))
@@ -166,7 +168,7 @@ def migrate(data):
         return data
     size=data.get('size',4)
     if not isinstance(size,int) or size not in range(4,9): size=4
-    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[]),'tally180':{},'finishes':[],'format':'pools','elimSize':4,'elim':default_elim(4)}
+    return {'poolCount':1,'size':size,'pools':[{'names':data.get('names',[]),'results':data.get('results',{}),'bullOrder':data.get('bullOrder',{})}],'cross':{},'date':data.get('date',''),'history':data.get('history',[]),'tally180':{},'finishes':[],'tally180Baseline':{},'finishesBaseline':0,'format':'pools','elimSize':4,'elim':default_elim(4)}
 def load():
     if not os.path.exists(DATA): return default_state()
     with open(DATA,encoding='utf-8') as f: return migrate(json.load(f))
@@ -258,13 +260,17 @@ def save(state):
     validate_tally180(tally180)
     finishes=state.get('finishes',[])
     validate_finishes(finishes)
+    tally180_baseline=state.get('tally180Baseline',{})
+    validate_tally180(tally180_baseline)
+    finishes_baseline=state.get('finishesBaseline',0)
+    if not (isinstance(finishes_baseline,int) and not isinstance(finishes_baseline,bool) and 0<=finishes_baseline<=len(finishes)): raise ValueError('Invalid finishes baseline.')
     fmt=state.get('format','pools')
     if fmt not in ('pools','elim'): raise ValueError('Invalid tournament format.')
     elim_size=int(state.get('elimSize',4))
     if elim_size<2 or elim_size>64 or elim_size%2!=0: raise ValueError('Elimination player count must be an even number from 2 to 64.')
     elim=state.get('elim',default_elim(elim_size))
     validate_elim(elim,elim_size)
-    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes,'format':fmt,'elimSize':elim_size,'elim':elim}
+    clean={'poolCount':pool_count,'size':size,'pools':pools,'cross':cross,'date':date,'history':history,'tally180':tally180,'finishes':finishes,'tally180Baseline':tally180_baseline,'finishesBaseline':finishes_baseline,'format':fmt,'elimSize':elim_size,'elim':elim}
     if os.path.exists(DATA):
         try: shutil.copyfile(DATA,DATA+'.bak')
         except OSError: pass
