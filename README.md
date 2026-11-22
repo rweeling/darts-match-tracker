@@ -209,7 +209,11 @@ just a flash, either: each pool's standings keep a small badge next to a player'
 for every 180 and high finish of the current tournament, so the tally stays visible long
 after the confetti has settled. It resets with each new tournament: the 180 and
 high-finish lists themselves keep running all season (see "How to use it" above), but
-the badges only ever show what happened since the last reset or new day.
+the badges only ever show what happened since the last reset or new day. If a
+tournament was already in progress before this was added, or the lists carry older
+history from before it, the "Reset display highlights" button next to "Reset
+tournament" marks everything so far as past history without touching names, results,
+or the bracket, so the display starts counting fresh from there.
 
 ### Read-only mode and login
 
