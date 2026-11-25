@@ -66,9 +66,10 @@ The big-screen display, cycling through standings and bracket slides on its own.
   165, 166, 168, and 169) can be entered.
 - A "Previous winners" leaderboard across tournaments, with the same merge tooling.
 - An auto-rotating, read-only **big-screen display** for a TV or projector, with its
-  own light/dark theme and an on-screen confetti celebration whenever a 180, a high
+  own theme toggle and an on-screen confetti celebration whenever a 180, a high
   finish, or a tournament champion is recorded.
-- Light and dark themes on both the editor and the display, remembered per browser.
+- Dark, light, and dartboard themes (warm black, cream, board red and green) on both
+  the editor and the display, remembered per browser.
 - A Dutch/English language toggle on both pages, remembered per browser.
 - One-file JSON backup/import, with password-gated editing (everyone can still view)
   required on every running container.
@@ -139,7 +140,7 @@ in plain terms:
    same `<ip address>` as above) on the TV or projector. It's read-only and cycles
    through standings and matches on its own, nothing to click.
 8. There's a **"Download backup" button** in the header if someone wants a copy of
-   the current data saved to a file, and a light/dark theme toggle next to it. The
+   the current data saved to a file, and a theme menu next to it to pick dark, light, or dartboard. The
    **"Import backup" button** next to it does the reverse: pick a previously
    downloaded backup file and it replaces everything currently on the page, after
    a confirmation step. Import needs "Log in to edit" first, same as other changes.
@@ -200,7 +201,7 @@ nothing but "Not yet known" while pool play is still getting started. Once every
 has finished its round-robin, the pool-standings slides drop out on their own and it
 shows only the knockout bracket.
 
-It has its own light/dark theme toggle (a small button in the top-right corner,
+It has its own dark/light/dartboard theme menu (a small button in the top-right corner,
 independent of the editor's) and celebrates live: whenever a 180 or a high finish gets
 logged on the editor, the display picks it up on its next poll and runs a short
 confetti burst with the player's name (gold for a 180, teal for a high finish), so the
