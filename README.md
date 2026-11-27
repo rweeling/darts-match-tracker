@@ -263,7 +263,11 @@ same address, login is locked out for 5 minutes to slow down password guessing.
 The container itself serves plain HTTP, with no TLS. See the warning under "Build
 and run" above. If it needs to be reachable from anywhere other than a trusted local
 network, put it behind a reverse proxy (nginx, Caddy, Traefik, etc.) that terminates
-HTTPS; otherwise the password and session cookie travel in plaintext.
+HTTPS; otherwise the password and session cookie travel in plaintext. Once that proxy
+is in place, add `-e SECURE_COOKIES=1` so the session cookie is only ever sent back
+over HTTPS. Leave it unset for a plain-HTTP/LAN-only setup, since the browser would
+otherwise silently refuse to store the cookie at all and login would appear to do
+nothing.
 
 To reset a tournament, stop the container and remove the volume:
 

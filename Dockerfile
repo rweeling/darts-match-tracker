@@ -18,12 +18,15 @@ COPY favicon.svg /app/favicon.svg
 COPY --from=gitinfo /version.json /app/version.json
 COPY <<'PY' /app/server.py
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import json, os, shutil, hmac, hashlib, re, sys, time, threading
+import json, os, shutil, hmac, hashlib, re, sys, time, threading, secrets
 
 DATA='/data/state.json'
 EDITOR_PASSWORD=os.environ.get('EDITOR_PASSWORD','').strip()
 if not EDITOR_PASSWORD:
     sys.exit('EDITOR_PASSWORD must be set. Start the container with -e EDITOR_PASSWORD=yourpassword.')
+SECURE_COOKIES=os.environ.get('SECURE_COOKIES','').strip().lower() in ('1','true','yes')
+MAX_LOGIN_BODY=8*1024
+MAX_STATE_BODY=2*1024*1024
 LOGIN_MAX_ATTEMPTS=5
 LOGIN_LOCKOUT_SECONDS=300
 LOGIN_ATTEMPTS={}
@@ -130,8 +133,22 @@ def cross_keys_for(pool_count):
         num_prev=num_cur
     keys.add('final')
     return keys
-def make_token():
-    return hmac.new(EDITOR_PASSWORD.encode(),b'editor-session',hashlib.sha256).hexdigest()
+SESSIONS={}
+SESSIONS_LOCK=threading.Lock()
+SESSION_MAX_AGE=15552000
+def issue_session():
+    now=time.time()
+    with SESSIONS_LOCK:
+        if len(SESSIONS)>10000:
+            for k,v in list(SESSIONS.items()):
+                if v<now: del SESSIONS[k]
+        token=secrets.token_hex(32)
+        SESSIONS[token]=now+SESSION_MAX_AGE
+    return token
+def revoke_session(handler):
+    token=get_cookie(handler,'session')
+    if token:
+        with SESSIONS_LOCK: SESSIONS.pop(token,None)
 def get_cookie(handler,name):
     for part in handler.headers.get('Cookie','').split(';'):
         part=part.strip()
@@ -139,7 +156,9 @@ def get_cookie(handler,name):
     return None
 def is_authed(handler):
     token=get_cookie(handler,'session')
-    return bool(token) and hmac.compare_digest(token,make_token())
+    if not token: return False
+    with SESSIONS_LOCK: exp=SESSIONS.get(token)
+    return bool(exp) and exp>time.time()
 def default_pool(size):
     return {'names':[f'Player {i}' for i in range(1,size+1)],'results':{},'bullOrder':{}}
 def default_elim(size):
@@ -281,6 +300,8 @@ class Handler(BaseHTTPRequestHandler):
     def reply(self,status,obj,ctype='application/json; charset=utf-8',extra_headers=None):
         body=obj if isinstance(obj,bytes) else json.dumps(obj,ensure_ascii=False).encode()
         self.send_response(status);self.send_header('Content-Type',ctype);self.send_header('Content-Length',str(len(body)));self.send_header('X-Content-Type-Options','nosniff')
+        self.send_header('X-Frame-Options','DENY');self.send_header('Referrer-Policy','no-referrer')
+        self.send_header('Content-Security-Policy',"default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
         for k,v in (extra_headers or {}).items(): self.send_header(k,v)
         self.end_headers();self.wfile.write(body)
     def do_GET(self):
@@ -305,22 +326,29 @@ class Handler(BaseHTTPRequestHandler):
             ip=self.client_address[0]
             retry_after=login_rate_limited(ip)
             if retry_after>0: return self.reply(429,{'error':f'Too many attempts. Try again in {int(retry_after)+1}s.'})
-            try: body=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
+            length=int(self.headers.get('Content-Length','0') or '0')
+            if length<0 or length>MAX_LOGIN_BODY: return self.reply(413,{'error':'Request body too large.'})
+            try: body=json.loads(self.rfile.read(length))
             except json.JSONDecodeError: return self.reply(400,{'error':'Invalid request'})
             password=str(body.get('password',''))
             if hmac.compare_digest(password,EDITOR_PASSWORD):
                 login_record_success(ip)
-                return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':f'session={make_token()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=15552000'})
+                cookie=f'session={issue_session()}; Path=/; HttpOnly; SameSite=Strict; Max-Age={SESSION_MAX_AGE}'+('; Secure' if SECURE_COOKIES else '')
+                return self.reply(200,{'authed':True},extra_headers={'Set-Cookie':cookie})
             login_record_failure(ip)
             return self.reply(401,{'error':'Incorrect password'})
         if self.path=='/api/logout':
-            return self.reply(200,{'authed':False},extra_headers={'Set-Cookie':'session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'})
+            revoke_session(self)
+            cookie='session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'+('; Secure' if SECURE_COOKIES else '')
+            return self.reply(200,{'authed':False},extra_headers={'Set-Cookie':cookie})
         return self.reply(404,{'error':'Not found'})
     def do_PUT(self):
         if self.path!='/api/state': return self.reply(404,{'error':'Not found'})
         if not is_authed(self): return self.reply(401,{'error':'Log in to edit.'})
+        length=int(self.headers.get('Content-Length','0') or '0')
+        if length<0 or length>MAX_STATE_BODY: return self.reply(413,{'error':'Request body too large.'})
         try:
-            state=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))
+            state=json.loads(self.rfile.read(length))
             return self.reply(200,save(state))
         except (ValueError,TypeError,KeyError,json.JSONDecodeError) as e: return self.reply(400,{'error':str(e) or 'Invalid state'})
     def log_message(self,*args): pass
