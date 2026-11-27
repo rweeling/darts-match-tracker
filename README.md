@@ -54,6 +54,10 @@ until that's filled in.
 
 The big-screen display, cycling through standings and bracket slides on its own.
 
+![Dartboard theme](screenshots/display-dartboard.jpg)
+
+The dartboard theme, on the same display.
+
 ## Features
 
 - Round-robin pools (4-8 players, 1/2/4/6/8/10 pools) feeding a seeded knockout
