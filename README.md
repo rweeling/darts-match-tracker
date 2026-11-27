@@ -293,4 +293,5 @@ MIT. See [LICENSE](LICENSE).
 ## Contributors
 
 - Ramon Weeling ([@rweeling](https://github.com/rweeling))
+- Vincent de Jong
 - Claude (Anthropic), AI pair-programming assistant
