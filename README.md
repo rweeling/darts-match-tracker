@@ -45,16 +45,40 @@ until that's filled in.
 
 ## Screenshots
 
-| | |
-|---|---|
-| ![Fixture schedule and standings](screenshots/schedule-standings.jpg)<br>Fixture schedule and live standings | ![Semifinals and final](screenshots/semifinal-final.jpg)<br>Semifinals and final, once the pool resolves |
-| ![Statistics tab](screenshots/statistics.jpg)<br>180s, high finishes, and previous winners | ![Single-elimination bracket](screenshots/elimination-bracket.jpg)<br>The single-elimination bracket |
+Click a screenshot to open it full size.
 
-![Big-screen display](screenshots/display-bracket.jpg)
+<table>
+<tr>
+<td align="center" width="50%">
+<a href="screenshots/schedule-standings.jpg"><img src="screenshots/schedule-standings.jpg" width="380"></a><br>
+Fixture schedule and live standings
+</td>
+<td align="center" width="50%">
+<a href="screenshots/semifinal-final.jpg"><img src="screenshots/semifinal-final.jpg" width="380"></a><br>
+Semifinals and final, once the pool resolves
+</td>
+</tr>
+<tr>
+<td align="center" width="50%">
+<a href="screenshots/statistics.jpg"><img src="screenshots/statistics.jpg" width="380"></a><br>
+180s, high finishes, and previous winners
+</td>
+<td align="center" width="50%">
+<a href="screenshots/elimination-bracket.jpg"><img src="screenshots/elimination-bracket.jpg" width="380"></a><br>
+The single-elimination bracket
+</td>
+</tr>
+</table>
+
+<p align="center">
+<a href="screenshots/display-bracket.jpg"><img src="screenshots/display-bracket.jpg" width="460"></a>
+</p>
 
 The big-screen display, cycling through standings and bracket slides on its own.
 
-![Dartboard theme](screenshots/display-dartboard.jpg)
+<p align="center">
+<a href="screenshots/display-dartboard.jpg"><img src="screenshots/display-dartboard.jpg" width="460"></a>
+</p>
 
 The dartboard theme, on the same display.
 
