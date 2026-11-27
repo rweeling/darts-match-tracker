@@ -87,7 +87,8 @@ just for the top 2 instead of the top 4), and they cross into a knockout bracket
 instead of the single-pool semifinal: with 2 pools, pool A's #1 plays pool B's #2 and
 pool B's #1 plays pool A's #2, then the two winners meet in the final; with 4 pools,
 the same cross-seeding happens within each pair of pools (A/B and C/D) as a
-quarterfinal round first. All pools share one pool size.
+quarterfinal round first. Each pool has its own size (4-8 players), picked
+separately under "Pool size", so pools don't all need the same number of players.
 
 With 6, 8, or 10 pools there are 12, 16, or 20 qualifiers (not a clean power of 2),
 so the bracket is seeded with "byes": the strongest-seeded qualifiers (pool winners
@@ -251,8 +252,7 @@ docker volume rm darts-data
   4-6 players.
 - Only 1, 2, 4, 6, 8, or 10 pools are supported per running container (not an
   arbitrary count). 6 and 10 pools use a seeded knockout bracket with byes (see
-  "Multiple pools" above) rather than a clean power-of-2 bracket. All pools in a
-  container share one pool size.
+  "Multiple pools" above) rather than a clean power-of-2 bracket.
 
 ## License
 
